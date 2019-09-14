@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">GroupTracker</string>
+    <string name="title_activity_sign_in">SignIn</string>
+</resources>
