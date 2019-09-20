@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "263474556325",
+    "firebase_url": "https://grouptracker-ef84c.firebaseio.com",
+    "project_id": "grouptracker-ef84c",
+    "storage_bucket": "grouptracker-ef84c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263474556325:android:188fd8f7b5ae9e6a824c4c",
+        "android_client_info": {
+          "package_name": "com.syedsadman16.grouptracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "263474556325-ml33nv68ccmie35igvehka7egedncfr4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjB_2SqPQHTmX4wAQ4VzS4dmYx0OA38no"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "263474556325-ml33nv68ccmie35igvehka7egedncfr4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

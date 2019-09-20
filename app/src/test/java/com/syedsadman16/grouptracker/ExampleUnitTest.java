@@ -1,4 +1,4 @@
-package com.example.grouptracker;
+package com.syedsadman16.grouptracker;
 
 import org.junit.Test;
 
