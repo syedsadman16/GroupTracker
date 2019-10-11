@@ -9,40 +9,71 @@
 
 
     <Button
-        android:id="@+id/chatButton"
-        android:layout_width="357dp"
-        android:layout_height="59dp"
-        android:layout_marginStart="27dp"
-        android:layout_marginLeft="27dp"
-        android:layout_marginTop="56dp"
+        android:id="@+id/eventBtn"
+        android:layout_width="150dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="27dp"
         android:layout_marginRight="27dp"
+        android:layout_marginBottom="18dp"
+        android:background="@drawable/round_button"
+        android:text="Add Event"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="#F6F4F4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/profileBtn"
+        app:layout_constraintTop_toBottomOf="@+id/locationButton" />
+
+    <Button
+        android:id="@+id/profileBtn"
+        android:layout_width="150dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginLeft="27dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="17dp"
+        android:background="@drawable/round_button"
+        android:text="Profile"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="#F6F4F4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chatButton" />
+
+    <Button
+        android:id="@+id/chatButton"
+        android:layout_width="150dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="27dp"
+        android:layout_marginLeft="27dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/round_button"
         android:text="Chat"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="#F6F4F4"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/myRectangleView" />
 
     <Button
         android:id="@+id/locationButton"
-        android:layout_width="357dp"
-        android:layout_height="59dp"
-        android:layout_marginStart="27dp"
-        android:layout_marginLeft="27dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="150dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="27dp"
         android:layout_marginRight="27dp"
-        android:layout_marginBottom="134dp"
         android:background="@drawable/round_button"
         android:text="Location"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="#F6F4F4"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chatButton" />
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintStart_toEndOf="@+id/chatButton"
+        app:layout_constraintTop_toBottomOf="@+id/myRectangleView" />
 
     <Button
         android:id="@+id/signOutBtn"
@@ -70,7 +101,7 @@
         android:layout_marginEnd="2dp"
         android:layout_marginRight="2dp"
         android:layout_marginBottom="388dp"
-        android:background="#D81B60"
+        android:background="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.533"
@@ -78,8 +109,8 @@
 
     <View
         android:id="@+id/myRectangleView"
-        android:layout_width="365dp"
-        android:layout_height="228dp"
+        android:layout_width="380dp"
+        android:layout_height="240dp"
         android:layout_marginStart="17dp"
         android:layout_marginLeft="17dp"
         android:layout_marginTop="136dp"
