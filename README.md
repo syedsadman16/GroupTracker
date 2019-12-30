@@ -11,7 +11,9 @@ The app has the following features:
 
 * [X] Users can sign in and register
 * [ ] View and manage team members
-* [ ] Group chat option 
+* [ ] Create and Join events
+* [ ] Configure Shared Map
+* [ ] Group chats 
 * [ ] TBA
 
 
