@@ -1,9 +1,8 @@
-package com.syedsadman16.grouptracker;
+package com.syedsadman16.grouptracker.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,6 +26,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.syedsadman16.grouptracker.R;
 
 import org.json.JSONObject;
 

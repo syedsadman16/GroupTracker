@@ -1,4 +1,4 @@
-package com.syedsadman16.grouptracker;
+package com.syedsadman16.grouptracker.Activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,12 +17,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.firebase.client.Firebase;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.syedsadman16.grouptracker.Models.User;
+import com.syedsadman16.grouptracker.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,4 +1,4 @@
-package com.syedsadman16.grouptracker;
+package com.syedsadman16.grouptracker.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -7,22 +7,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-public class EventViewer extends AppCompatActivity {
+import com.syedsadman16.grouptracker.R;
+
+public class EventCreation extends AppCompatActivity {
 Button goBackBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_event_viewer);
+        setContentView(R.layout.activity_event_creation);
 
-        goBackBtn = findViewById(R.id.image);
+        goBackBtn = findViewById(R.id.backBtn);
         goBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(EventViewer.this, MainActivity.class));
+                startActivity(new Intent(EventCreation.this, MainActivity.class));
             }
         });
-
     }
-
-
 }
