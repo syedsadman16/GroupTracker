@@ -6,5 +6,6 @@ public class User {
     public static String firstName = "";
     public static String email = "";
     public static String phone = "";
+    public static String eventid = "";
 
 }

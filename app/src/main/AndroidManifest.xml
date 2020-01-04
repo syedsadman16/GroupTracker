@@ -13,7 +13,7 @@
         android:theme="@style/NoActionBar">
         <activity android:name=".Activities.EventViewer" />
         <activity android:name=".Activities.EventCreation" />
-        <activity android:name=".Activities.SignUp">
+        <activity android:name=".Activities.SignIn">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

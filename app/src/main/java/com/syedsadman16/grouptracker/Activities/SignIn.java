@@ -28,9 +28,9 @@ import com.syedsadman16.grouptracker.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class SignUp extends AppCompatActivity {
+public class SignIn extends AppCompatActivity {
 
-    String email, password, firstName, fullName ,phoneNumber;
+    String email, password, firstName, lastName, fullName ,phoneNumber, eventid;
     EditText getEmailField, getPasswordField;
     Button goToRegistration, signInButton;
     private FirebaseAuth mAuth;
@@ -40,11 +40,15 @@ public class SignUp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        // Auto-sign in user
         mAuth = FirebaseAuth.getInstance();
         if(mAuth.getCurrentUser() != null){
-            startActivity(new Intent(SignUp.this, MainActivity.class));
+            Log.i("Signin", User.email + " has signed in");
+            // Retrieve User data from Firebase
+            getUserJSONValues();
         }
 
+        // Setting up buttons
         getEmailField = findViewById(R.id.emailField);
         getPasswordField = findViewById(R.id.passwordField);
         goToRegistration = findViewById(R.id.registerButton);
@@ -52,13 +56,13 @@ public class SignUp extends AppCompatActivity {
 
         goToRegistration.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { Intent intent = new Intent(SignUp.this, Registration.class);startActivity(intent);}
+            public void onClick(View v) { Intent intent = new Intent(SignIn.this, Registration.class);startActivity(intent);}
         });
 
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Log.i("log", "testing log");
                 authorizeUser();
             }
         });
@@ -69,49 +73,14 @@ public class SignUp extends AppCompatActivity {
         email = getEmailField.getText().toString();
         password = getPasswordField.getText().toString();
 
-
+        // Auth signs in with email and password
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Set firebase instance
-                            FirebaseUser user = mAuth.getCurrentUser();
-
-                            // Retrieve user profile
-                            String url = "https://grouptracker-ef84c.firebaseio.com/users.json";
-                            StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
-                                @Override
-                                public void onResponse(String s) {
-                                    try {
-                                        //Setup as JSONObject
-                                        JSONObject obj = new JSONObject(s);
-                                        String id = mAuth.getUid();
-                                        firstName = obj.getJSONObject(id).getString("First Name");
-                                        String lastName = obj.getJSONObject(id).getString("Last Name");
-                                        fullName = firstName + "" + lastName;
-                                        phoneNumber = obj.getJSONObject(id).getString("Phone Number");
-                                        email = obj.getJSONObject(id).getString("Email");
-                                        User.fullName = fullName;
-                                        User.firstName = firstName;
-                                        User.email = email;
-                                        User.phone = phoneNumber;
-
-                                        startActivity(new Intent(SignUp.this, MainActivity.class));
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            },new Response.ErrorListener(){
-                                    @Override
-                                    public void onErrorResponse(VolleyError volleyError) {
-                                        Log.i("VolleyError", ""+volleyError);
-                                    }
-                             });
-                            RequestQueue rQueue = Volley.newRequestQueue(SignUp.this);
-                            rQueue.add(stringRequest);
+                            getUserJSONValues();
                         }
-
                         // If sign in fails, display a message to the user.
                         else {
                             Log.i("SignIn", String.valueOf(task.getException()));
@@ -119,6 +88,48 @@ public class SignUp extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    public void getUserJSONValues(){
+
+        // Retrieve user profile
+        String url = "https://grouptracker-ef84c.firebaseio.com/users.json";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+            @Override
+            public void onResponse(String s) {
+                try {
+
+                    // Retrieve as JSON and get desired fields
+                    JSONObject obj = new JSONObject(s);
+                    String id = mAuth.getUid(); // Firebase generated UID
+                    firstName = obj.getJSONObject(id).getString("First Name");
+                    lastName = obj.getJSONObject(id).getString("Last Name");
+                    phoneNumber = obj.getJSONObject(id).getString("Phone Number");
+                    email = obj.getJSONObject(id).getString("Email");
+                    eventid = obj.getJSONObject(id).getString("eventid");
+                    fullName = firstName + "" + lastName;
+
+                    // Add details for current User
+                    User.fullName = fullName;
+                    User.firstName = firstName;
+                    User.email = email;
+                    User.phone = phoneNumber;
+                    User.eventid = eventid;
+
+                    startActivity(new Intent(SignIn.this, MainActivity.class));
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.i("VolleyError", ""+volleyError);
+            }
+        });
+        RequestQueue rQueue = Volley.newRequestQueue(SignIn.this);
+        rQueue.add(stringRequest);
     }
 
 

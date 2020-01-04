@@ -102,7 +102,7 @@ public class Registration extends AppCompatActivity {
             // Instantiate the RequestQueue.
             RequestQueue rQueue = Volley.newRequestQueue(this);
 
-            //Checks JSON file from Realtime Database
+            // Checks JSON file from Realtime Database
             String url = "https://grouptracker-ef84c.firebaseio.com/users.json";
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -110,7 +110,7 @@ public class Registration extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONObject obj = new JSONObject(response);
-                                //Check if user being created doesnt exist
+                                // If user doesn't exist, create it
                                 if (!obj.has(email)) {
                                     authenticateUser();
                                 } else {
@@ -146,6 +146,8 @@ public class Registration extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             Log.i("Auth", "Successs!");
+
+                            // Auth already created user, now get custom UID to make info abt user
                             String uid = auth.getCurrentUser().getUid();
 
                             // Add user details to Realtime Database
@@ -156,6 +158,7 @@ public class Registration extends AppCompatActivity {
                             reference.child(uid).child("First Name").setValue(firstName);
                             reference.child(uid).child("Last Name").setValue(lastName);
                             reference.child(uid).child("Phone Number").setValue(phoneNumber);
+                            reference.child(uid).child("eventid").setValue("null");
 
                             // Complete Registration
                             Toast.makeText(getApplicationContext(), "Registered User!", Toast.LENGTH_SHORT).show();
@@ -174,7 +177,7 @@ public class Registration extends AppCompatActivity {
 
     // Intent to go to Sign In
     public void goToSignIn(){
-        Intent intent = new Intent(Registration.this, SignUp.class);
+        Intent intent = new Intent(Registration.this, SignIn.class);
         startActivity(intent);
     }
 
