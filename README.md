@@ -11,8 +11,8 @@ The app has the following features:
 
 * [X] Users can sign in and register  
 * [ ] Create and Join events
-    * [ ] Rediredct users to default or events activity
-    * [ ] Search/Join list of events
+    * [X] Rediredct users to default or events activity
+    * [X] View/Join list of events
     * [ ] Persist joined events
     * [ ] Create new events
     * [ ] Set images for events
@@ -40,6 +40,9 @@ Preview
 
 ## Notes
 Thought process is detailed in commit messages
+Images 
+https://stackoverflow.com/questions/36117882/is-it-possible-to-store-image-to-firebase-in-android
+RecyclerView in Dialog
 
 Challenges Encountered:
 - Allowing users to join and leave events

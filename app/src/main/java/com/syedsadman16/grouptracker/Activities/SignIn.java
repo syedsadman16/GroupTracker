@@ -93,6 +93,7 @@ public class SignIn extends AppCompatActivity {
     public void getUserJSONValues(){
 
         // Retrieve user profile
+        // Volley works in the background thread
         String url = "https://grouptracker-ef84c.firebaseio.com/users.json";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
             @Override
@@ -109,13 +110,14 @@ public class SignIn extends AppCompatActivity {
                     eventid = obj.getJSONObject(id).getString("eventid");
                     fullName = firstName + "" + lastName;
 
-                    // Add details for current User
+                    // Add details for static User
                     User.fullName = fullName;
                     User.firstName = firstName;
                     User.email = email;
                     User.phone = phoneNumber;
                     User.eventid = eventid;
 
+                    Toast.makeText(getApplicationContext(), "Signing in...", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(SignIn.this, MainActivity.class));
                 }
                 catch (JSONException e) {

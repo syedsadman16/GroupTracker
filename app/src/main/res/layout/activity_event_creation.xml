@@ -8,7 +8,6 @@
     tools:context=".Activities.EventCreation">
 
     <ImageView
-        android:id="@+id/image"
         android:layout_width="424dp"
         android:layout_height="217dp"
         android:layout_marginBottom="442dp"
@@ -21,8 +20,8 @@
 
     <Button
         android:id="@+id/backBtn"
-        android:layout_width="56dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="12dp"
@@ -79,7 +78,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/eventImage" />
 
     <EditText
         android:id="@+id/eventLocationField"
@@ -130,7 +129,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/eventImage"
         android:layout_width="0dp"
         android:layout_height="204dp"
         android:layout_marginStart="16dp"

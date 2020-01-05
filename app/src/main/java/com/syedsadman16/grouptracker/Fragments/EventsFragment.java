@@ -37,7 +37,7 @@ public class EventsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         sign_out_btn = view.findViewById(R.id.signOutBtn);
-        join_button = view.findViewById(R.id.join_button);
+        join_button = view.findViewById(R.id.joinButton);
         create_button = view.findViewById(R.id.create_button);
 
         // Setting up sign in Button (temporary)
