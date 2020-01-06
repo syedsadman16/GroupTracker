@@ -13,12 +13,13 @@ The app has the following features:
 * [ ] Create and Join events
     * [X] Rediredct users to default or events activity
     * [X] View/Join list of events
-    * [ ] Persist joined events
-    * [ ] Create new events
+    * [/] Persist joined events
+    * [/] Create new events
     * [ ] Set images for events
     * [ ] Events can be open or password protected
     * [ ] Allow users to be invited to an event group
-    * [ ] Setup GPS to location
+    * [X] Autocomplete location
+    * [/] Setup GPS to location
     * [ ] Admin can remove members from group
 * [ ] Configure Shared Map
     * [ ] Show marker for all members
@@ -42,13 +43,21 @@ Preview
 Thought process is detailed in commit messages
 Images 
 https://stackoverflow.com/questions/36117882/is-it-possible-to-store-image-to-firebase-in-android
+USing PlaceAUtoCompleteFragment to get location
+https://developers.google.com/places/android-sdk/autocomplete
+https://www.youtube.com/watch?v=6Trdd9EnmqY
 RecyclerView in Dialog
+
+PlacesAPI Autocomplete
+https://medium.com/skillhive/android-google-places-autocomplete-feature-bb3064308f05
 
 Challenges Encountered:
 - Allowing users to join and leave events
 - Figuring out how to structure objects correctly in firebase
+- AutocompletePlacesFragment was depricated
+- DialogFragment for places api - null pointer when using it on fragments
 
-
+https://www.youtube.com/playlist?list=PLgCYzUzKIBE-SZUrVOsbYMzH7tPigT3gi
 https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d794c2
 
 ## License

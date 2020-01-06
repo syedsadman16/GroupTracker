@@ -30,7 +30,7 @@ import java.util.Iterator;
 public class EventViewer extends AppCompatActivity {
 
     ArrayList<Events> eventsArrayList = new ArrayList<>();
-    String eventid, date, description, image, location, name ,password, createdBy, uid;
+    String eventid, date, time, description, image, location, name ,password, createdBy, uid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class EventViewer extends AppCompatActivity {
                         eventid = i.next().toString();
                         name = jsonObject.getJSONObject(eventid).getString("Name");
                         date = jsonObject.getJSONObject(eventid).getString("Date");
+                        time = jsonObject.getJSONObject(eventid).getString("Time");
                         description = jsonObject.getJSONObject(eventid).getString("Description");
                         image = jsonObject.getJSONObject(eventid).getString("Image");
                         location = jsonObject.getJSONObject(eventid).getString("Location");
@@ -70,6 +71,7 @@ public class EventViewer extends AppCompatActivity {
 
                         Events event = new Events(name, createdBy, date);
                         event.setEventDescription(description);
+                        event.setEventTime(time);
                         event.setEventImageURL(image);
                         event.setEventLocation(location);
                         event.setPassword(password);

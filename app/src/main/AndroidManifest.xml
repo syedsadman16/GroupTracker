@@ -3,6 +3,7 @@
     package="com.syedsadman16.grouptracker">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -11,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/NoActionBar">
+        <activity android:name=".Activities.MapsActivity"></activity>
         <activity android:name=".Activities.EventViewer" />
         <activity android:name=".Activities.EventCreation" />
         <activity android:name=".Activities.SignIn">
