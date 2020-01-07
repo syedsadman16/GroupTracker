@@ -1,12 +1,12 @@
 package com.syedsadman16.grouptracker.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
+
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.media.Image;
+
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -16,15 +16,22 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.firebase.client.Firebase;
+
+import com.google.firebase.FirebaseApp;
+import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 import java.util.Calendar;
 
+import static com.syedsadman16.grouptracker.Models.User.email;
+
 public class EventCreation extends AppCompatActivity {
     Button goBackBtn, displayDateButton, displayTimeButton, addEventBtn;
     ImageView eventImage, locationIcon;
-    TextView eventDescription, eventName, eventLocation;
+    TextView eventDescription, eventName, eventLocation, eventPassword;
     String location;
 
     @Override
@@ -32,9 +39,12 @@ public class EventCreation extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_creation);
 
+        Firebase.setAndroidContext(this);
+
         eventImage = (ImageView) findViewById(R.id.eventImage);
         eventDescription = findViewById(R.id.eventDescField);
         eventName = findViewById(R.id.eventNameField);
+        eventPassword = findViewById(R.id.eventPassword);
         eventLocation = findViewById(R.id.eventLocationField);
         displayDateButton = findViewById(R.id.displayDateButton);
         displayTimeButton = findViewById(R.id.displayTimeButton);
@@ -54,6 +64,7 @@ public class EventCreation extends AppCompatActivity {
                 timePicker();
             }
         });
+
         goBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,29 +79,54 @@ public class EventCreation extends AppCompatActivity {
             }
         });
 
-        locationIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Open Google Maps Navigation
-
-            }
-        });
 
         addEventBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Get the contents of the fields
-
                 // Save to Database
-
-                //Switch Activity
+                pushToFirebase(User.fullName, displayDateButton.getText().toString(), eventDescription.getText().toString(),
+                        "null", eventLocation.getText().toString(), eventName.getText().toString(),
+                        eventPassword.getText().toString(), displayTimeButton.getText().toString(), User.uid);
+                // Update eventid in Firebase
+                changeUserFirebase();
+                // Go back to Main Activity
+                startActivity(new Intent(EventCreation.this, MainActivity.class));
+                finish();
             }
         });
 
 
-        //FirebaseDatabase database = FirebaseDatabase.getInstance();
-        //String key = database.getReference("quiz").push().getKey();
+    }
 
+    public void pushToFirebase(String createdBy, String Date, String Description, String Image,
+                                String Location, String Name, String Password, String Time, String uid){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        // Generate a UID
+        String key = reference.push().getKey();
+        // Set parent UID
+        reference.child(key).setValue(key);
+        // Push child references
+        reference.child(key).child("CreatedBy").setValue(createdBy);
+        reference.child(key).child("Date").setValue(Date);
+        reference.child(key).child("Description").setValue(Description);
+        reference.child(key).child("Image").setValue(Image);
+        reference.child(key).child("Location").setValue(Location);
+        reference.child(key).child("Name").setValue(Name);
+        reference.child(key).child("Password").setValue(Password);
+        reference.child(key).child("Time").setValue(Time);
+        reference.child(key).child("uid").setValue(uid); // Owner
+        reference.child(key).child("eventid").setValue(key); // Reference the event in EventViewer
+        reference.child(key).child("Members").child(User.uid).setValue(User.uid); // Members list
+
+        // Complete
+        Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
+        // Change user eventid to auto join event
+        User.eventid = key;
+    }
+
+    public void changeUserFirebase(){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+        reference.child(User.uid).child("eventid").setValue(User.eventid);
     }
 
 

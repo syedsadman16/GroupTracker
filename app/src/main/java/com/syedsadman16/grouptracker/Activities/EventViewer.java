@@ -16,6 +16,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.syedsadman16.grouptracker.Adapters.EventsAdapter;
 import com.syedsadman16.grouptracker.Models.Events;
 import com.syedsadman16.grouptracker.Models.User;
@@ -44,54 +48,37 @@ public class EventViewer extends AppCompatActivity {
         // Set layout manager to position the items
         eventRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Retrieve user profile
-        String url = "https://grouptracker-ef84c.firebaseio.com/events.json";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
+        Firebase.setAndroidContext(this);
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot child : dataSnapshot.getChildren() ){
 
-                    // Need an iterator to return keys
-                    Iterator i = jsonObject.keys();
-                    while (i.hasNext()) {
+                    name = child.child("Name").getValue().toString();
+                    date = child.child("Date").getValue().toString();
+                    time = child.child("Time").getValue().toString();
+                    description = child.child("Description").getValue().toString();
+                    image = child.child("Image").getValue().toString();
+                    location = child.child("Location").getValue().toString();
+                    password = child.child("Password").getValue().toString();
+                    createdBy = child.child("CreatedBy").getValue().toString();
+                    uid = child.child("uid").getValue().toString();
+                    eventid = child.child("eventid").getValue().toString();
 
-                        eventid = i.next().toString();
-                        name = jsonObject.getJSONObject(eventid).getString("Name");
-                        date = jsonObject.getJSONObject(eventid).getString("Date");
-                        time = jsonObject.getJSONObject(eventid).getString("Time");
-                        description = jsonObject.getJSONObject(eventid).getString("Description");
-                        image = jsonObject.getJSONObject(eventid).getString("Image");
-                        location = jsonObject.getJSONObject(eventid).getString("Location");
-                        password = jsonObject.getJSONObject(eventid).getString("Password");
-                        createdBy = jsonObject.getJSONObject(eventid).getString("CreatedBy");
-                        uid = jsonObject.getJSONObject(eventid).getString("uid");
+                    Log.i("EventViewer", name+""+date+""+location+""+password+""+uid);
 
-                        Log.i("EventViewer", name+""+date+""+location+""+password+""+uid);
+                    // Adding to events object for future use
+                    Events event = new Events(name, createdBy, date, eventid);
+                    eventsArrayList.add(event);
 
-                        Events event = new Events(name, createdBy, date);
-                        event.setEventDescription(description);
-                        event.setEventTime(time);
-                        event.setEventImageURL(image);
-                        event.setEventLocation(location);
-                        event.setPassword(password);
-                        event.setUid(uid);
-                        eventsArrayList.add(event);
-
-                        adapter.notifyDataSetChanged();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
+                adapter.notifyDataSetChanged();
             }
-        },new Response.ErrorListener(){
+
             @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.i("VolleyError", ""+volleyError);
-            }
+            public void onCancelled(FirebaseError firebaseError) {}
         });
-        RequestQueue rQueue = Volley.newRequestQueue(getApplicationContext());
-        rQueue.add(stringRequest);
 
     }
 

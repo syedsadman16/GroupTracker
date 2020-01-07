@@ -70,6 +70,14 @@ public class MainActivity extends AppCompatActivity {
         // Set default selection to be launched
         bottomNavigationView.setSelectedItemId(R.id.event_button);
 
+
     }
+
+    @Override
+    public void onBackPressed() {
+        Log.i("Main", "Back pressed");
+    }
+
+
 
 }

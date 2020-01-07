@@ -4,15 +4,19 @@ import android.widget.ImageView;
 
 public class Events {
 
-    public String hostName, uid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, password;
+    public String hostName, uid, eventid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, password;
 
 
-    public Events(String name, String createdBy, String date) {
+    public Events(String name, String createdBy, String date, String eventID) {
         eventName = name;
         eventDate = date;
         hostName = createdBy;
+        eventid = eventID;
     }
 
+    public String getEventid() { return eventid; }
+
+    public void setEventid(String eventid) { this.eventid = eventid; }
 
     public String getEventName() {
         return eventName;

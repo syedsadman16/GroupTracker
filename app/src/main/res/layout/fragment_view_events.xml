@@ -76,7 +76,7 @@
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="64dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -89,38 +89,33 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/event_location_text"
+                android:id="@+id/eventLocationTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginLeft="28dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="282dp"
-                android:layout_marginRight="282dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
                 android:text="Location"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 android:textColor="#1E88E5"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_time_text" />
+                app:layout_constraintTop_toBottomOf="@+id/eventTimeTextView" />
 
             <TextView
-                android:id="@+id/event_time_text"
+                android:id="@+id/eventTimeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginLeft="28dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="311dp"
-                android:layout_marginRight="311dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
                 android:text="Time"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:textColor="#0F0E0E"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_name_text" />
+                app:layout_constraintTop_toBottomOf="@+id/eventNameTextView" />
 
             <ImageView
-                android:id="@+id/event_image_view"
+                android:id="@+id/eventImageView"
                 android:layout_width="371dp"
                 android:layout_height="190dp"
                 android:layout_marginStart="16dp"
@@ -134,52 +129,48 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/event_name_text"
+                android:id="@+id/eventNameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginLeft="28dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginEnd="73dp"
-                android:layout_marginRight="73dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
                 android:text="Name of the Event"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:textColor="#121111"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_image_view" />
+                app:layout_constraintTop_toBottomOf="@+id/eventImageView" />
 
             <TextView
-                android:id="@+id/event_details_text"
+                android:id="@+id/eventDetailsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:layout_marginLeft="28dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="296dp"
-                android:layout_marginRight="296dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
                 android:text="Details"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:textColor="#0F0E0E"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_location_text" />
+                app:layout_constraintTop_toBottomOf="@+id/eventLocationTextView" />
 
             <Button
-                android:id="@+id/view_members_button"
+                android:id="@+id/viewMembersButton"
                 android:layout_width="330dp"
                 android:layout_height="43dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginLeft="24dp"
-                android:layout_marginTop="68dp"
+                android:layout_marginTop="40dp"
                 android:layout_marginEnd="25dp"
                 android:layout_marginRight="25dp"
                 android:text="12 members going"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/event_details_text" />
+                app:layout_constraintTop_toBottomOf="@+id/eventDetailsTextView" />
 
             <Button
-                android:id="@+id/leave_group_button"
+                android:id="@+id/leaveGroupButton"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -189,9 +180,12 @@
                 android:layout_marginEnd="132dp"
                 android:layout_marginRight="132dp"
                 android:text="Leave Group"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/view_members_button" />
+                app:layout_constraintTop_toBottomOf="@+id/viewMembersButton"
+                app:layout_constraintVertical_bias="0.6" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

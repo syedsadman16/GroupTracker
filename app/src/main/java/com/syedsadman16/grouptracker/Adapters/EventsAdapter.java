@@ -1,6 +1,8 @@
 package com.syedsadman16.grouptracker.Adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,7 +15,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.client.Firebase;
+import com.syedsadman16.grouptracker.Activities.MainActivity;
 import com.syedsadman16.grouptracker.Models.Events;
+import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 import java.util.ArrayList;
@@ -45,6 +50,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         public TextView eventName;
         public TextView eventDate;
         public TextView eventHost;
+        public Button joinButton;
 
 
         public ViewHolder(View itemView) {
@@ -53,6 +59,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
             eventName = (TextView) itemView.findViewById(R.id.eventName);
             eventHost = (TextView) itemView.findViewById(R.id.eventHost);
             eventDate = (TextView) itemView.findViewById(R.id.eventDate);
+            joinButton = itemView.findViewById(R.id.joinButton);
         }
 
 
@@ -60,7 +67,33 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
             eventName.setText(events.getEventName());
             eventHost.setText("Created by " + events.getHostName());
             eventDate.setText(events.getEventDate());
+            joinButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    User.eventid = events.getEventid();
+                    updateFirebase();
+                    updateMembersFirebase();
+                    Context context = v.getContext();
+                    Intent intent = new Intent(context, MainActivity.class);
+                    context.startActivity(intent);
+                    ((Activity)context).finish();
+                }
+            });
+
         }
+
+        public void updateFirebase(){
+            // Update users eventid
+            Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+            reference.child(User.uid).child("eventid").setValue(User.eventid);
+        }
+
+        public void updateMembersFirebase(){
+            // Add user to members list
+            Firebase eventReference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+            eventReference.child(User.eventid).child("Members").child(User.uid).setValue(User.uid); // Members list
+        }
+
 
     }
 
