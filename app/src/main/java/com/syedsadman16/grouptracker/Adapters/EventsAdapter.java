@@ -3,7 +3,10 @@ package com.syedsadman16.grouptracker.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,6 +82,12 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
                     ((Activity)context).finish();
                 }
             });
+            // Take base64 string and decode into byte array
+            byte[] imageBytes2 = Base64.decode(events.getEventPicture(), Base64.DEFAULT);
+            // Convert the byte array into a Bitmap
+            Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
+            eventImage.setScaleType(ImageView.ScaleType.FIT_XY);
+            eventImage.setImageBitmap(decodedImage);
 
         }
 

@@ -9,7 +9,7 @@
         app:showAsAction="always" />
     <item
         android:id="@+id/map_button"
-        android:icon="@drawable/location_icon_24dp"
+        android:icon="@drawable/navigation_24dp"
         android:title="Map"
         app:showAsAction="always" />
     <item

@@ -51,6 +51,7 @@ public class EventViewer extends AppCompatActivity {
         Firebase.setAndroidContext(this);
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
         reference.addValueEventListener(new ValueEventListener() {
+            // Gets all children of Events.json ==> eventid (unique id for each individual event)
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot child : dataSnapshot.getChildren() ){
@@ -58,8 +59,9 @@ public class EventViewer extends AppCompatActivity {
                     name = child.child("Name").getValue().toString();
                     date = child.child("Date").getValue().toString();
                     time = child.child("Time").getValue().toString();
-                    description = child.child("Description").getValue().toString();
                     image = child.child("Image").getValue().toString();
+                    Log.i("EventViewer", image);
+                    description = child.child("Description").getValue().toString();
                     location = child.child("Location").getValue().toString();
                     password = child.child("Password").getValue().toString();
                     createdBy = child.child("CreatedBy").getValue().toString();
@@ -70,6 +72,7 @@ public class EventViewer extends AppCompatActivity {
 
                     // Adding to events object for future use
                     Events event = new Events(name, createdBy, date, eventid);
+                    event.setEventPicture(image);
                     eventsArrayList.add(event);
 
                 }

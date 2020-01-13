@@ -15,37 +15,28 @@ public class Events {
     }
 
     public String getEventid() { return eventid; }
-
     public void setEventid(String eventid) { this.eventid = eventid; }
-
-    public String getEventName() {
-        return eventName;
-    }
-
-    public String getHostName() { return hostName; }
-
-    public String getUid() { return uid; }
-
-    public void setUid(String uid) { this.uid = uid; }
-
-    public String getPassword() { return password; }
-
-    public void setPassword(String password) { this.password = password; }
-
-    public void setHostName(String hostName) { this.hostName = hostName; }
-
-    public String getEventImageURL() { return eventImageURL; }
-
-    public void setEventImageURL(String eventImageURL) { this.eventImageURL = eventImageURL; }
 
     public void setEventName(String eventName) {
         this.eventName = eventName;
     }
+    public String getEventName() {
+        return eventName;
+    }
+
+    public void setHostName(String hostName) { this.hostName = hostName; }
+    public String getHostName() { return hostName; }
+
+    public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
 
     public String getEventLocation() {
         return eventLocation;
     }
-
     public void setEventLocation(String eventLocation) {
         this.eventLocation = eventLocation;
     }
@@ -53,7 +44,6 @@ public class Events {
     public String getEventTime() {
         return eventTime;
     }
-
     public void setEventTime(String eventTime) {
         this.eventTime = eventTime;
     }
@@ -61,7 +51,6 @@ public class Events {
     public String getEventDate() {
         return eventDate;
     }
-
     public void setEventDate(String eventDate) {
         this.eventDate = eventDate;
     }
@@ -69,13 +58,11 @@ public class Events {
     public String getEventDescription() {
         return eventDescription;
     }
-
     public void setEventDescription(String eventDescription) { this.eventDescription = eventDescription; }
 
     public String getEventPicture() {
         return eventImageURL;
     }
-
     public void setEventPicture(String eventImageURL) {
         this.eventImageURL = eventImageURL;
     }

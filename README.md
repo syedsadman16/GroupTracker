@@ -15,11 +15,12 @@ The app has the following features:
     * [X] View/Join list of events
     * [X] Persist joined events
     * [X] Create new events
-    * [ ] Set images for events
+    * [X] Set images for events
     * [ ] Events can be open or password protected
     * [ ] Allow users to be invited to an event group
     * [X] Autocomplete location
-    * [ ] Setup GPS to location
+    * [X] Setup GPS to location
+    * [ ] Edit events
     * [ ] Admin can remove members from group
 * [ ] Configure Shared Map
     * [ ] Show marker for all members
@@ -27,6 +28,7 @@ The app has the following features:
     * [ ] Set common destination marker
     * [ ] Broadcast message 
 * [ ] Group chats 
+* [ ] Photo Sharing
 * [ ] TBA
 
 
@@ -41,9 +43,12 @@ Preview
 
 
 ## Notes
-Thought process is detailed in commit messages
+
+
 Images 
 https://stackoverflow.com/questions/36117882/is-it-possible-to-store-image-to-firebase-in-android
+https://www.thecrazyprogrammer.com/2016/10/android-convert-image-base64-string-base64-string-image.html
+https://demonuts.com/pick-image-gallery-camera-android/
 USing PlaceAUtoCompleteFragment to get location
 https://developers.google.com/places/android-sdk/autocomplete
 https://www.youtube.com/watch?v=6Trdd9EnmqY
@@ -52,13 +57,17 @@ RecyclerView in Dialog
 PlacesAPI Autocomplete
 https://medium.com/skillhive/android-google-places-autocomplete-feature-bb3064308f05
 
-Challenges Encountered:
+Bugs/Challenges:
 - Allowing users to join and leave events
 - Figuring out how to structure objects correctly in firebase
 - AutocompletePlacesFragment was depricated - Used newer PlacesAPI
 - DialogFragment for places api - null pointer when using it on fragments
 - RecylerView only shows 1 item - layout_height of LinearLayout was set to to match_parent
 - Creating and updating members list in firebase
+- Finding a way to upload image into firebase and retrieve it, without new dependencies and saving space on database -  Encode image into base64 String and save to Firebase
+- Picking image from gallery and uploading it to ImageView
+- Removing all members in an event from firebase 
+- Images not getting pushed to firebase, somehow broke - Created Logs to test, suddenly works?
 
 https://www.youtube.com/playlist?list=PLgCYzUzKIBE-SZUrVOsbYMzH7tPigT3gi
 https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d794c2

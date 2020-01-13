@@ -1,5 +1,7 @@
 package com.syedsadman16.grouptracker.Models;
 
+import android.graphics.Bitmap;
+
 public class User {
 
     public static String fullName = "";
@@ -8,5 +10,6 @@ public class User {
     public static String phone = "";
     public static String eventid = "";
     public static String uid = "";
+    public static String bitmap = "";
 
 }
