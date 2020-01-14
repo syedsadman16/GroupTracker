@@ -36,6 +36,10 @@ public class EventViewer extends AppCompatActivity {
     ArrayList<Events> eventsArrayList = new ArrayList<>();
     String eventid, date, time, description, image, location, name ,password, createdBy, uid;
 
+    /*
+     * Just for viewing events. To Join events, check EventsAdapter
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +52,7 @@ public class EventViewer extends AppCompatActivity {
         // Set layout manager to position the items
         eventRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+
         Firebase.setAndroidContext(this);
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
         reference.addValueEventListener(new ValueEventListener() {
@@ -56,23 +61,19 @@ public class EventViewer extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot child : dataSnapshot.getChildren() ){
 
-                    name = child.child("Name").getValue().toString();
-                    date = child.child("Date").getValue().toString();
-                    time = child.child("Time").getValue().toString();
-                    image = child.child("Image").getValue().toString();
-                    Log.i("EventViewer", image);
-                    description = child.child("Description").getValue().toString();
-                    location = child.child("Location").getValue().toString();
-                    password = child.child("Password").getValue().toString();
-                    createdBy = child.child("CreatedBy").getValue().toString();
+                    name = child.child("eventName").getValue().toString();
+                    date = child.child("eventDate").getValue().toString();
+                    time = child.child("eventTime").getValue().toString();
+                    image = child.child("eventImageURL").getValue().toString();
+                    description = child.child("eventDescription").getValue().toString();
+                    location = child.child("eventLocation").getValue().toString();
+                    password = child.child("eventPassword").getValue().toString();
+                    createdBy = child.child("createdBy").getValue().toString();
                     uid = child.child("uid").getValue().toString();
                     eventid = child.child("eventid").getValue().toString();
 
-                    Log.i("EventViewer", name+""+date+""+location+""+password+""+uid);
-
                     // Adding to events object for future use
-                    Events event = new Events(name, createdBy, date, eventid);
-                    event.setEventPicture(image);
+                    Events event = new Events(name, createdBy, date, eventid, image);
                     eventsArrayList.add(event);
 
                 }

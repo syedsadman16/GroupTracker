@@ -100,7 +100,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         public void updateMembersFirebase(){
             // Add user to members list
             Firebase eventReference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
-            eventReference.child(User.eventid).child("Members").child(User.uid).setValue(User.uid); // Members list
+            eventReference.child(User.eventid).child("Members").child(User.uid).child("uid").setValue(User.uid); // Members list
         }
 
 

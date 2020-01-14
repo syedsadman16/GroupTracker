@@ -29,6 +29,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.syedsadman16.grouptracker.Activities.MainActivity;
+import com.syedsadman16.grouptracker.Activities.MapsActivity;
 import com.syedsadman16.grouptracker.Activities.SignIn;
 import com.syedsadman16.grouptracker.Models.Events;
 import com.syedsadman16.grouptracker.Models.User;
@@ -70,8 +71,6 @@ public class ViewEventsFragment extends Fragment {
         leaveGroupButton = view.findViewById(R.id.leaveGroupButton);
         eventImageView = view.findViewById(R.id.eventImageView);
 
-        Firebase.setAndroidContext(getActivity());
-
         // Setting up sign out Button (temporary)
         sign_out_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,17 +85,22 @@ public class ViewEventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // If event owner leaves, then delete the event
-                /*if(uid.equals(User.uid)){ //event_owner = current_owner
+                if(uid.equals(User.uid)){ //event_owner = current_owner
+                    User.eventid = "null";
                     changeAllUserFirebase();
                     //deleteEvent();
-                    Log.i("ViewEventsFragment", "Works");
-                } else { // Regular users to be deleted
-                    */// Remove current user from members list and change their eventid status
+                    Log.i("ViewEventsFragment", User.eventid);
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+
+                }
+                else { // Regular users to be deleted
+                    // Remove current user from members list and change their eventid status
                     removeMemberFirebase();
                     User.eventid = "null";
                     changeUserFirebase(User.uid, User.eventid);
-                //}
-                startActivity(new Intent(getActivity(), MainActivity.class));
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+                }
+
             }
         });
 
@@ -109,55 +113,50 @@ public class ViewEventsFragment extends Fragment {
             }
         });
 
-
-        // Retrieve eventid of the signed-in user to select specific group user is in
-        eventid = User.eventid;
-        Log.i("EventCreation", "ViewEventsFrag" + User.eventid);
-        // Check the  eventid and pull specific key from datatbase
-        String url = "https://grouptracker-ef84c.firebaseio.com/events.json";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>(){
-            @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    name = jsonObject.getJSONObject(eventid).getString("Name");
-                    date = jsonObject.getJSONObject(eventid).getString("Date");
-                    time = jsonObject.getJSONObject(eventid).getString("Time");
-                    description = jsonObject.getJSONObject(eventid).getString("Description");
-                    location = jsonObject.getJSONObject(eventid).getString("Location");
-                    createdBy = jsonObject.getJSONObject(eventid).getString("CreatedBy"); // name of event creator
-                    uid = jsonObject.getJSONObject(eventid).getString("uid"); // UID of the event creator
-                    image = jsonObject.getJSONObject(eventid).getString("Image");
-
-                    Log.i("ViewEvents", name + date + location);
-                    nameTextView.setText(name);
-                    timeTextView.setText( date + " " + "@" + " " + time);
-                    locationTextView.setText("" +location);
-                    detailsTextView.setText(description);
-
-                    // Take base64 string and decode into byte array
-                    byte[] imageBytes2 = Base64.decode(image, Base64.DEFAULT);
-                    // Convert the byte array into a Bitmap
-                    Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
-                    eventImageView.setScaleType(ImageView.ScaleType.FIT_XY);
-                    eventImageView.setImageBitmap(decodedImage);
-
-                }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        },new Response.ErrorListener(){
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Log.i("VolleyError", ""+volleyError);
-            }
-        });
-        RequestQueue rQueue = Volley.newRequestQueue(getActivity());
-        rQueue.add(stringRequest);
-
+        Firebase.setAndroidContext(getActivity());
+        if(!User.eventid.equals("null")){
+            pullFirebaseData();
+        }
 
     }
+
+    public void pullFirebaseData(){
+        // Retrieve eventid of the signed-in user to select specific group user is in
+        eventid = User.eventid;
+
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                name = dataSnapshot.child(eventid).child("eventName").getValue().toString();
+                date = dataSnapshot.child(eventid).child("eventDate").getValue().toString();
+                time = dataSnapshot.child(eventid).child("eventTime").getValue().toString();
+                description = dataSnapshot.child(eventid).child("eventDescription").getValue().toString();
+                location = dataSnapshot.child(eventid).child("eventLocation").getValue().toString();
+                createdBy = dataSnapshot.child(eventid).child("createdBy").getValue().toString();
+                uid = dataSnapshot.child(eventid).child("uid").getValue().toString();
+                image = dataSnapshot.child(eventid).child("eventImageURL").getValue().toString();
+
+                nameTextView.setText(name);
+                timeTextView.setText( date + " " + "@" + " " + time);
+                locationTextView.setText("" +location);
+                detailsTextView.setText(description);
+
+                // Take base64 string and decode into byte array
+                byte[] imageBytes2 = Base64.decode(image, Base64.DEFAULT);
+                // Convert the byte array into a Bitmap
+                Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
+                eventImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                eventImageView.setImageBitmap(decodedImage);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                startActivity(new Intent(getActivity(), MainActivity.class));
+            }
+        });
+    }
+
 
     // Changes eventid of single user
     public void changeUserFirebase(String userid,String eventid){
@@ -174,16 +173,16 @@ public class ViewEventsFragment extends Fragment {
     // Changes eventid of all users
     public void changeAllUserFirebase(){
         // Change eventid of all member to "null"
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+eventid);
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+eventid+"/Members");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot child : dataSnapshot.getChildren() ){
                     // Get each member
-                    //String memberid = child.child("Members");
-                    //changeUserFirebase(memberid, "null");
-                    Log.i("ViewEventsFragment", "eventid"+eventid);
-                   // Log.i("ViewEventsFragment", "UID"+memberid);
+                    String memberid = child.child("uid").getValue().toString();
+                    changeUserFirebase(memberid, "null");
+                    Log.i("ViewEventsFragment", "Deleted all users");
+
                 }
             }
             @Override

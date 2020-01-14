@@ -4,14 +4,30 @@ import android.widget.ImageView;
 
 public class Events {
 
-    public String hostName, uid, eventid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, password;
+    public String createdBy, uid, eventid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, eventPassword;
 
-
-    public Events(String name, String createdBy, String date, String eventID) {
+    // Constructor for Adapter
+    public Events(String name, String ownerName, String date, String eventID, String image) {
         eventName = name;
         eventDate = date;
-        hostName = createdBy;
+        createdBy = ownerName;
         eventid = eventID;
+        eventImageURL = image;
+    }
+
+    // Constructor for EventCreation
+    public Events(String EventID, String ownerName, String Date, String Description, String Image,
+                  String Location, String Name, String Password, String Time, String Uid) {
+        eventid = EventID;
+        createdBy = ownerName;
+        eventDate = Date;
+        eventDescription = Description;
+        eventImageURL = Image;
+        eventLocation = Location;
+        eventName = Name;
+        eventPassword = Password;
+        eventTime = Time;
+        uid = Uid;
     }
 
     public String getEventid() { return eventid; }
@@ -24,14 +40,14 @@ public class Events {
         return eventName;
     }
 
-    public void setHostName(String hostName) { this.hostName = hostName; }
-    public String getHostName() { return hostName; }
+    public void setHostName(String hostName) { this.createdBy = hostName; }
+    public String getHostName() { return createdBy; }
 
     public String getUid() { return uid; }
     public void setUid(String uid) { this.uid = uid; }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPassword() { return eventPassword; }
+    public void setPassword(String password) { this.eventPassword = password; }
 
 
     public String getEventLocation() {

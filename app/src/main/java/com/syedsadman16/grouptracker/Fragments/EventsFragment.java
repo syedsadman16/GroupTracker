@@ -56,6 +56,7 @@ public class EventsFragment extends Fragment {
                 startActivity(new Intent(getActivity(), EventCreation.class));
             }
         });
+
         join_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

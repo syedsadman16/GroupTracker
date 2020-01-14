@@ -31,21 +31,21 @@ import android.widget.Toast;
 import com.firebase.client.Firebase;
 
 import com.google.firebase.FirebaseApp;
+import com.syedsadman16.grouptracker.Models.Events;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 
-import static com.syedsadman16.grouptracker.Models.User.email;
 
 public class EventCreation extends AppCompatActivity {
     Button goBackBtn, displayDateButton, displayTimeButton, addEventBtn;
     ImageView eventImage, locationIcon;
-    TextView eventDescription, eventName, eventLocation, eventPassword, chooseImageTextView;
-    String location;
+    TextView eventDescriptionTextView, eventNameTextView, eventLocationTextView, eventPasswordTextView, chooseImageTextView;
+    String createdBy, uid, eventid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, eventPassword;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +55,10 @@ public class EventCreation extends AppCompatActivity {
         Firebase.setAndroidContext(this);
 
         eventImage = (ImageView) findViewById(R.id.eventImage);
-        eventDescription = findViewById(R.id.eventDescField);
-        eventName = findViewById(R.id.eventNameField);
-        eventPassword = findViewById(R.id.eventPassword);
-        eventLocation = findViewById(R.id.eventLocationField);
+        eventDescriptionTextView = findViewById(R.id.eventDescField);
+        eventNameTextView = findViewById(R.id.eventNameField);
+        eventPasswordTextView = findViewById(R.id.eventPassword);
+        eventLocationTextView = findViewById(R.id.eventLocationField);
         displayDateButton = findViewById(R.id.displayDateButton);
         displayTimeButton = findViewById(R.id.displayTimeButton);
         goBackBtn = findViewById(R.id.backBtn);
@@ -66,7 +66,7 @@ public class EventCreation extends AppCompatActivity {
         locationIcon = findViewById(R.id.locationIcon);
         chooseImageTextView = findViewById(R.id.chooseImageTextView);
 
-        eventLocation.setInputType(InputType.TYPE_NULL);
+        eventLocationTextView.setInputType(InputType.TYPE_NULL);
 
         displayDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +89,7 @@ public class EventCreation extends AppCompatActivity {
             }
         });
 
-        eventLocation.setOnClickListener(new View.OnClickListener() {
+        eventLocationTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), 2);
@@ -99,7 +99,6 @@ public class EventCreation extends AppCompatActivity {
         eventImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Selects image and converts to Bitmap
                 selectImage();
             }
         });
@@ -108,8 +107,8 @@ public class EventCreation extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if(eventName.getText().toString().equals("")){
-                    eventName.setError("Required");
+                if(eventNameTextView.getText().toString().equals("")){
+                    eventNameTextView.setError("Required");
                 }
                 else if(displayDateButton.getText().toString().equals("Choose Date")){
                     displayDateButton.setError("Required");
@@ -117,27 +116,66 @@ public class EventCreation extends AppCompatActivity {
                 else if(displayTimeButton.equals("00:00")){
                     displayTimeButton.setError("Required");
                 }
-                else if(eventLocation.getText().toString().equals("")){
-                    displayTimeButton.setError("Required");
-                } else {
-                    // Save to Database
-                    pushToFirebase(User.fullName, displayDateButton.getText().toString(), eventDescription.getText().toString(),
-                            User.bitmap, eventLocation.getText().toString(), eventName.getText().toString(),
-                            eventPassword.getText().toString(), displayTimeButton.getText().toString(), User.uid);
-                    Log.i("EventCreation", User.bitmap);
-                    // Update eventid in Firebase
+                else if(eventLocationTextView.getText().toString().equals("")){
+                    eventLocationTextView.setError("Required");
+                }
+                else {
+                    createdBy = User.fullName;
+                    eventDate = displayDateButton.getText().toString();
+                    eventDescription = eventDescriptionTextView.getText().toString();
+                    eventImageURL = User.bitmap;
+                    eventLocation =  eventLocationTextView.getText().toString();
+                    eventName =  eventNameTextView.getText().toString();
+                    eventPassword = eventPasswordTextView.getText().toString();
+                    eventTime = displayTimeButton.getText().toString();
+                    uid = User.uid;
+
+                    pushToFirebase(createdBy, eventDate, eventDescription, eventImageURL, eventLocation,
+                            eventName, eventPassword, eventTime, uid);
+
                     changeUserFirebase();
-                    Log.i("EventCreation", "Created EventID" + User.eventid);
-                    // Go back to Main Activity
                     startActivity(new Intent(EventCreation.this, MainActivity.class));
                     finish();
                 }
             }
         });
 
-
     }
 
+
+    // Creates a new event with given details
+    public void pushToFirebase(String createdBy, String Date, String Description, String Image,
+                               String Location, String Name, String Password, String Time, String uid){
+
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+
+        // Generate a UID
+        String key = reference.push().getKey();
+        User.eventid = key;
+
+        Log.i("EventCreation", "(1/3) Created Key");
+
+        // Create Events object and push it to database
+        Events events = new Events(key, createdBy, Date, Description, Image, Location, Name, Password, Time, uid);
+
+        Log.i("EventCreation", "(2/3) Created Events object");
+
+        reference.child(key).setValue(events);
+        // Create a members list
+        reference.child(key).child("Members").child(User.uid).child("uid").setValue(User.uid);
+
+        Log.i("EventCreation", "(3/3) Pushed to Firebase");
+
+        Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
+    }
+
+    // Change event status of user
+    public void changeUserFirebase(){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+        reference.child(User.uid).child("eventid").setValue(User.eventid);
+    }
+
+    // Selects image and converts to Bitmap
     private void selectImage() {
         final CharSequence[] menuOptions = {"Take picture","Select from Gallery","Cancel"};
         AlertDialog.Builder builder = new AlertDialog.Builder(EventCreation.this);
@@ -177,6 +215,7 @@ public class EventCreation extends AppCompatActivity {
                         eventImage.setImageBitmap(selectedImage);
                     }
                     break;
+
                 case 1:
                     // image picker - Choosing Gallery
                     if (resultCode == RESULT_OK && data != null) {
@@ -192,51 +231,19 @@ public class EventCreation extends AppCompatActivity {
                         }
                     }
                     break;
+
                 case 2:
                     // Location picker
                     if(resultCode == RESULT_OK) {
                         String location = data.getStringExtra("location");
                         Log.i("EVentCreation", location);
-                        eventLocation.setText(location);
+                        eventLocationTextView.setText(location);
                     }
                     break;
             }
         }
     }
 
-    // Creates a new event with given details
-    public void pushToFirebase(String createdBy, String Date, String Description, String Image,
-                                String Location, String Name, String Password, String Time, String uid){
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
-        // Generate a UID
-        String key = reference.push().getKey();
-        // Set parent UID
-        reference.child(key).setValue(key);
-        // Push child references
-        reference.child(key).child("CreatedBy").setValue(createdBy); // Name of owner
-        reference.child(key).child("Date").setValue(Date);
-        reference.child(key).child("Description").setValue(Description);
-        reference.child(key).child("Location").setValue(Location);
-        reference.child(key).child("Name").setValue(Name); // name of Event
-        reference.child(key).child("Password").setValue(Password);
-        reference.child(key).child("Time").setValue(Time);
-        reference.child(key).child("uid").setValue(uid); // ID of the owner
-        reference.child(key).child("eventid").setValue(key); // event id, used to reference in EventViewer
-        reference.child(key).child("Members").child(User.uid).setValue(User.uid); // Members list
-        reference.child(key).child("Image").setValue(Image);
-
-        // Complete
-        Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
-        // Change user eventid (used to auto join event)
-        User.eventid = key;
-        Log.i("EventCreation", "Pushed EventID" + User.eventid);
-    }
-
-    // Changes eventid status for a user
-    public void changeUserFirebase(){
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
-        reference.child(User.uid).child("eventid").setValue(User.eventid);
-    }
 
     // Returns image as a string
     public String convertToBase64(Bitmap bitmap){

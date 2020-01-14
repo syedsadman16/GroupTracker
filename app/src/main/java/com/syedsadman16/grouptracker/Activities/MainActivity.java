@@ -33,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
 
-        // define your fragments here
-        final Fragment fragment1 = new EventsFragment();
-        final Fragment fragment1b = new ViewEventsFragment();
+        final Fragment fragment1 = new EventsFragment(); // Default
+        final Fragment fragment1b = new ViewEventsFragment(); // Joined event
         final Fragment fragment2 = new ChatFragment();
         final Fragment fragment3 = new MapsFragment();
 
@@ -44,29 +43,33 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 Fragment fragment;
                 switch (item.getItemId()) {
+
                     case R.id.event_button:
-                        Log.i("Main", User.eventid);
-                        // If the user is not in any event, take to default events page
+                        Log.i("ViewEventsFragment", "MainActivity: "+User.eventid);
+                        // Check to see if user is already in an event
                         if(User.eventid.equals("null")) {
                             fragment = fragment1;
                         }
-                        // else take them to detailed events page
                         else {
                             fragment = fragment1b;
                         }
                         break;
+
                     case R.id.chat_button:
                         fragment = fragment2;
                         break;
+
                     case R.id.map_button:
                         fragment = fragment3;
                         break;
+
                     default: return true;
                 }
                 fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).commit();
                 return true;
             }
         });
+
         // Set default selection to be launched
         bottomNavigationView.setSelectedItemId(R.id.event_button);
 

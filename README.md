@@ -43,7 +43,7 @@ Preview
 
 
 ## Notes
-
+Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db. Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
 
 Images 
 https://stackoverflow.com/questions/36117882/is-it-possible-to-store-image-to-firebase-in-android
@@ -66,8 +66,12 @@ Bugs/Challenges:
 - Creating and updating members list in firebase
 - Finding a way to upload image into firebase and retrieve it, without new dependencies and saving space on database -  Encode image into base64 String and save to Firebase
 - Picking image from gallery and uploading it to ImageView
-- Removing all members in an event from firebase 
+- Removing all members in an event from firebase. Cant loop through members list - 
 - Images not getting pushed to firebase, somehow broke - Created Logs to test, suddenly works?
+- Firebase doesn't create event with all fields, only createdBy and Date. Sometimes works - Create Event object and push class to firebase instead
+- After creating event, doesn't launch new event. Sometimes works, sometimes doesn't - Changed from Volley to Firebase Datasnapshot
+- When deleting event, doesnt launch intent to MainActivity
+- Cannot create new event after leaving event, new content isnt pushed to firebase - BUG:reference.child(key).setValue(key); 
 
 https://www.youtube.com/playlist?list=PLgCYzUzKIBE-SZUrVOsbYMzH7tPigT3gi
 https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d794c2
