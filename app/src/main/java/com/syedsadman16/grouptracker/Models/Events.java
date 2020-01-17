@@ -30,6 +30,16 @@ public class Events {
         uid = Uid;
     }
 
+    // Constructor for EditEvents
+    public Events(String Date, String Description, String Image, String Location, String Name, String Time) {
+        eventDate = Date;
+        eventDescription = Description;
+        eventImageURL = Image;
+        eventLocation = Location;
+        eventName = Name;
+        eventTime = Time;
+    }
+
     public String getEventid() { return eventid; }
     public void setEventid(String eventid) { this.eventid = eventid; }
 

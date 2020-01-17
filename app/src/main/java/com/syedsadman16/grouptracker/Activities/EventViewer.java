@@ -76,6 +76,7 @@ public class EventViewer extends AppCompatActivity {
                     Events event = new Events(name, createdBy, date, eventid, image);
                     eventsArrayList.add(event);
 
+
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -84,6 +85,12 @@ public class EventViewer extends AppCompatActivity {
             public void onCancelled(FirebaseError firebaseError) {}
         });
 
+    }
+
+    // Remove the entire event from Firebase
+    public void deleteEvent(){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.child(User.eventid).removeValue();
     }
 
 

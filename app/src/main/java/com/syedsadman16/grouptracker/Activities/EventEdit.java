@@ -2,35 +2,30 @@ package com.syedsadman16.grouptracker.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.InputType;
 import android.text.format.DateFormat;
 import android.util.Base64;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.firebase.client.Firebase;
-
-import com.google.firebase.FirebaseApp;
 import com.syedsadman16.grouptracker.Models.Events;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
@@ -39,147 +34,113 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
+public class EventEdit extends AppCompatActivity {
 
-public class EventCreation extends AppCompatActivity {
-    Button goBackBtn, displayDateButton, displayTimeButton, addEventBtn;
-    ImageView eventImage, locationIcon;
-    TextView eventDescriptionTextView, eventNameTextView, eventLocationTextView, eventPasswordTextView, chooseImageTextView;
-    String createdBy, uid, eventid, eventName, eventLocation, eventTime, eventDate, eventDescription, eventImageURL, eventPassword;
-
+    EditText editEventName, editEventDetails;
+    TextView editLocation;
+    ImageView editImageView;
+    Button editDate, editTime, saveButton;
+    String eventName, eventLocation, eventTime, eventDate, eventDescription, eventImage, eventPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_event_creation);
+        setContentView(R.layout.activity_event_edit);
 
-        Firebase.setAndroidContext(this);
+        editDate = findViewById(R.id.editDate);
+        editEventDetails = findViewById(R.id.editEventDetails);
+        editEventName = findViewById(R.id.editEventName);
+        editTime = findViewById(R.id.editTime);
+        editImageView = findViewById(R.id.editImageView);
+        editLocation = findViewById(R.id.editLocation);
+        saveButton = findViewById(R.id.saveButton);
 
-        eventImage = (ImageView) findViewById(R.id.eventImage);
-        eventDescriptionTextView = findViewById(R.id.eventDescField);
-        eventNameTextView = findViewById(R.id.eventNameField);
-        eventPasswordTextView = findViewById(R.id.eventPassword);
-        eventLocationTextView = findViewById(R.id.eventLocationField);
-        displayDateButton = findViewById(R.id.displayDateButton);
-        displayTimeButton = findViewById(R.id.displayTimeButton);
-        goBackBtn = findViewById(R.id.backBtn);
-        addEventBtn = findViewById(R.id.addEventBtn);
-        locationIcon = findViewById(R.id.locationIcon);
-        chooseImageTextView = findViewById(R.id.chooseImageTextView);
+        Intent edit = getIntent();
+        eventName = edit.getExtras().getString("Title");
+        eventDate = edit.getExtras().getString("Date");
+        eventLocation = edit.getExtras().getString("Location");
+        eventTime = edit.getExtras().getString("Time");
+        eventDescription = edit.getExtras().getString("Description");
+        eventImage = edit.getExtras().getString("Image");
 
-        eventLocationTextView.setInputType(InputType.TYPE_NULL);
+        User.bitmap = eventImage;
+        byte[] imageBytes2 = Base64.decode(eventImage, Base64.DEFAULT);
+        Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
+        editImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+        editImageView.setImageBitmap(decodedImage);
 
-        displayDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                datePicker();
-            }
-        });
+        editDate.setText(eventDate);
+        editEventDetails.setText(eventDescription);
+        editEventName.setText(eventName);
+        editTime.setText(eventTime);
+        editLocation.setText(eventLocation);
 
-        displayTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                timePicker();
-            }
-        });
-
-        goBackBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(EventCreation.this, MainActivity.class));
-            }
-        });
-
-        eventLocationTextView.setOnClickListener(new View.OnClickListener() {
+        editLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(new Intent(getApplicationContext(), MapsActivity.class), 2);
             }
         });
 
-        eventImage.setOnClickListener(new View.OnClickListener() {
+        editDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                datePicker();
+            }
+        });
+
+        editTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                timePicker();
+            }
+        });
+
+        editImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectImage();
             }
         });
 
-        addEventBtn.setOnClickListener(new View.OnClickListener() {
+        saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if(eventNameTextView.getText().toString().equals("")){
-                    eventNameTextView.setError("Required");
-                }
-                else if(displayDateButton.getText().toString().equals("Choose Date")){
-                    displayDateButton.setError("Required");
-                }
-                else if(displayTimeButton.equals("00:00")){
-                    displayTimeButton.setError("Required");
-                }
-                else if(eventLocationTextView.getText().toString().equals("")){
-                    eventLocationTextView.setError("Required");
-                }
-                else {
-                    createdBy = User.fullName;
-                    eventDate = displayDateButton.getText().toString();
-                    eventDescription = eventDescriptionTextView.getText().toString();
-                    eventImageURL = User.bitmap;
-                    eventLocation =  eventLocationTextView.getText().toString();
-                    eventName =  eventNameTextView.getText().toString();
-                    eventPassword = eventPasswordTextView.getText().toString();
-                    eventTime = displayTimeButton.getText().toString();
-                    uid = User.uid;
-
-                    pushToFirebase(createdBy, eventDate, eventDescription, eventImageURL, eventLocation,
-                            eventName, eventPassword, eventTime, uid);
-
-                    changeUserFirebase();
-                    startActivity(new Intent(EventCreation.this, MainActivity.class));
-                    finish();
-                }
+                eventDate = editDate.getText().toString();
+                eventName = editEventName.getText().toString();
+                eventLocation = editLocation.getText().toString();
+                eventTime = editTime.getText().toString();
+                eventDescription = editEventDetails.getText().toString();
+                eventImage = User.bitmap;
+                saveToFirebase(eventDate, eventDescription, eventImage, eventLocation, eventName, eventTime);
+                startActivity(new Intent(EventEdit.this, MainActivity.class));
+                finish();
             }
         });
 
     }
 
-
     // Creates a new event with given details
-    public void pushToFirebase(String createdBy, String Date, String Description, String Image,
-                               String Location, String Name, String Password, String Time, String uid){
+    public void saveToFirebase(String Date, String Description, String Image,
+                               String Location, String Name, String Time){
 
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
-
-        // Generate a UID
-        String key = reference.push().getKey();
-        // Change Users event status
-        User.eventid = key;
-
-        Log.i("EventCreation", "(1/3) Created Key");
-
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/");
         // Create Events object and push it to database
-        Events events = new Events(key, createdBy, Date, Description, Image, Location, Name, Password, Time, uid);
+       // Events editEvent = new Events(Date, Description, Image, Location, Name, Time);
+        reference.child(User.eventid).child("eventDate").setValue(Date);
+        reference.child(User.eventid).child("eventDescription").setValue(Description);
+        reference.child(User.eventid).child("eventImageURL").setValue(Image);
+        reference.child(User.eventid).child("eventLocation").setValue(Location);
+        reference.child(User.eventid).child("eventName").setValue(Name);
+        reference.child(User.eventid).child("eventTime").setValue(Time);
 
-        Log.i("EventCreation", "(2/3) Created Events object");
-
-        reference.child(key).setValue(events);
-        // Create a members list
-        reference.child(key).child("Members").child(User.uid).child("uid").setValue(User.uid);
-
-        Log.i("EventCreation", "(3/3) Pushed to Firebase");
-
-        Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
-    }
-
-    // Change event status of user
-    public void changeUserFirebase(){
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
-        reference.child(User.uid).child("eventid").setValue(User.eventid);
+        Toast.makeText(getApplicationContext(), "All Changes Saved", Toast.LENGTH_SHORT).show();
     }
 
     // Selects image and converts to Bitmap
     private void selectImage() {
         final CharSequence[] menuOptions = {"Take picture","Select from Gallery","Cancel"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(EventCreation.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(EventEdit.this);
         builder.setTitle("Choose an Event Picture");
 
         builder.setItems(menuOptions, new DialogInterface.OnClickListener() {
@@ -210,11 +171,8 @@ public class EventCreation extends AppCompatActivity {
                     // Image picker - Choosing camera
                     if (resultCode == RESULT_OK && data != null) {
                         Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
-                        // Set bitmap to user => used when pushing to firebase
                         User.bitmap = convertToBase64(selectedImage);
-                        // Hide the textview
-                        chooseImageTextView.setVisibility(View.INVISIBLE);
-                        eventImage.setImageBitmap(selectedImage);
+                        editImageView.setImageBitmap(selectedImage);
                     }
                     break;
 
@@ -225,9 +183,7 @@ public class EventCreation extends AppCompatActivity {
                         try {
                             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), contentURI);
                             User.bitmap = convertToBase64(bitmap);
-                            Log.i("EventCreation", User.bitmap);
-                            eventImage.setImageBitmap(bitmap);
-                            chooseImageTextView.setVisibility(View.INVISIBLE);
+                            editImageView.setImageBitmap(bitmap);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -238,8 +194,7 @@ public class EventCreation extends AppCompatActivity {
                     // Location picker
                     if(resultCode == RESULT_OK) {
                         String location = data.getStringExtra("location");
-                        Log.i("EVentCreation", location);
-                        eventLocationTextView.setText(location);
+                        editLocation.setText(location);
                     }
                     break;
             }
@@ -278,7 +233,7 @@ public class EventCreation extends AppCompatActivity {
                 calendar1.set(Calendar.DATE, date);
                 String dateText = DateFormat.format("EEEE, MMM d, yyyy", calendar1).toString();
 
-                displayDateButton.setText(dateText);
+                editDate.setText(dateText);
             }
         }, YEAR, MONTH, DATE);
 
@@ -298,12 +253,11 @@ public class EventCreation extends AppCompatActivity {
                 calendar1.set(Calendar.HOUR, hour);
                 calendar1.set(Calendar.MINUTE, minute);
                 String dateText = DateFormat.format("h:mm a", calendar1).toString();
-                displayTimeButton.setText(dateText);
+                editTime.setText(dateText);
             }
         }, hour, minute, is24HourFormat);
 
         timePickerDialog.show();
     }
-
 
 }

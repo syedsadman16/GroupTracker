@@ -44,7 +44,6 @@ public class SignIn extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         if(mAuth.getCurrentUser() != null){
             Log.i("Signin", User.email + " has signed in");
-            // Retrieve User data from Firebase
             getUserJSONValues();
         }
 
@@ -58,11 +57,9 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onClick(View v) { Intent intent = new Intent(SignIn.this, Registration.class);startActivity(intent);}
         });
-
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("log", "testing log");
                 authorizeUser();
             }
         });

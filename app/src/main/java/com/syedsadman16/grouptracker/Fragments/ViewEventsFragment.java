@@ -1,5 +1,7 @@
 package com.syedsadman16.grouptracker.Fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,13 +10,20 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.provider.MediaStore;
+import android.renderscript.Sampler;
+import android.text.Editable;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -28,6 +37,8 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.syedsadman16.grouptracker.Activities.EventEdit;
+import com.syedsadman16.grouptracker.Activities.EventViewer;
 import com.syedsadman16.grouptracker.Activities.MainActivity;
 import com.syedsadman16.grouptracker.Activities.MapsActivity;
 import com.syedsadman16.grouptracker.Activities.SignIn;
@@ -39,10 +50,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
+//=============================================================================
+// Retrieves information from Firebase and populates fields for an Event
+// Users can leave and Admin can delete events
+// IMPORTANT: Every time a listener is registered to an reference, it must
+//            be unregistered!!!
+//=============================================================================
 
 public class ViewEventsFragment extends Fragment {
 
-    Button sign_out_btn, leaveGroupButton;
+    Button sign_out_btn, leaveGroupButton, editEvent;
     String eventid, date, time, description, image, location, name ,password, createdBy, uid;
     String adminEventId;
     TextView nameTextView, timeTextView, locationTextView, detailsTextView;
@@ -52,14 +74,11 @@ public class ViewEventsFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_view_events, container, false);
     }
-
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -70,62 +89,14 @@ public class ViewEventsFragment extends Fragment {
         sign_out_btn = view.findViewById(R.id.signOutBtn);
         leaveGroupButton = view.findViewById(R.id.leaveGroupButton);
         eventImageView = view.findViewById(R.id.eventImageView);
+        editEvent = view.findViewById(R.id.editButton);
 
-        // Setting up sign out Button (temporary)
-        sign_out_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("EventsFragment", "User has signed out");
-                FirebaseAuth.getInstance().signOut();
-                startActivity(new Intent(getActivity(), SignIn.class));
-            }
-        });
-
-        leaveGroupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // If event owner leaves, then delete the event
-                if(uid.equals(User.uid)){ //event_owner = current_owner
-                    User.eventid = "null";
-                    changeAllUserFirebase();
-                    //deleteEvent();
-                    Log.i("ViewEventsFragment", User.eventid);
-                    startActivity(new Intent(getActivity(), MainActivity.class));
-
-                }
-                else { // Regular users to be deleted
-                    // Remove current user from members list and change their eventid status
-                    removeMemberFirebase();
-                    User.eventid = "null";
-                    changeUserFirebase(User.uid, User.eventid);
-                    startActivity(new Intent(getActivity(), MainActivity.class));
-                }
-
-            }
-        });
-
-        // Start navigation to destination
-        locationTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(android.content.Intent.ACTION_VIEW,
-                        Uri.parse("google.navigation:q="+location)));
-            }
-        });
-
+        // If user is here, then user has an eventid != null
+        // Create a reference and register it to receive information about the current event
         Firebase.setAndroidContext(getActivity());
-        if(!User.eventid.equals("null")){
-            pullFirebaseData();
-        }
-
-    }
-
-    public void pullFirebaseData(){
-        // Retrieve eventid of the signed-in user to select specific group user is in
+        final Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
         eventid = User.eventid;
-
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
-        reference.addValueEventListener(new ValueEventListener() {
+        final ValueEventListener eventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 name = dataSnapshot.child(eventid).child("eventName").getValue().toString();
@@ -143,8 +114,9 @@ public class ViewEventsFragment extends Fragment {
                 detailsTextView.setText(description);
 
                 // Take base64 string and decode into byte array
-                byte[] imageBytes2 = Base64.decode(image, Base64.DEFAULT);
                 // Convert the byte array into a Bitmap
+                // Set the Bitmap to ImageView
+                byte[] imageBytes2 = Base64.decode(image, Base64.DEFAULT);
                 Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
                 eventImageView.setScaleType(ImageView.ScaleType.FIT_XY);
                 eventImageView.setImageBitmap(decodedImage);
@@ -152,37 +124,134 @@ public class ViewEventsFragment extends Fragment {
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                startActivity(new Intent(getActivity(), MainActivity.class));
+
+            }
+        };
+        reference.addValueEventListener(eventListener);
+
+
+        // Change this to User Profile page
+        sign_out_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("EventsFragment", "User has signed out");
+                FirebaseAuth.getInstance().signOut();
+                startActivity(new Intent(getActivity(), SignIn.class));
             }
         });
+
+
+        // When the user leaves group
+        // Admin and Member have different permissions
+        leaveGroupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Admin permissions. Compare uid retrieved from event with User.uid
+                // First update Firebase by changing each members  eventid to "null"
+                // Switch to MainActivity => Default EventsFragment
+                // Unregister the reference and delete the event
+                if(uid.equals(User.uid)){
+                    changeAllUserFirebase();
+                    final String tempEventId = User.eventid;
+                    User.eventid = "null";
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+                    reference.removeEventListener(eventListener);
+                    deleteEvent(tempEventId);
+                }
+
+                // Member Permissions
+                // Remove member from Members list
+                // Update their eventid to "null"
+                else {
+                    removeMemberFirebase();
+                    User.eventid = "null";
+                    changeUserFirebase(User.uid, User.eventid);
+                    startActivity(new Intent(getActivity(), MainActivity.class));
+                }
+            }
+        });
+
+        // Allows the user to click the location and start GPS
+        locationTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse("google.navigation:q="+location)));
+            }
+        });
+
+        detailsTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(getContext());
+                final EditText edittext = new EditText(getContext());
+
+                float scale = getResources().getDisplayMetrics().density;
+                int dpSize = (int) (20*scale + 0.5f);
+
+                LinearLayout layout = new LinearLayout(getContext());
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setGravity(Gravity.CENTER_HORIZONTAL);
+                layout.setPadding(dpSize, 0, dpSize, 0);
+                layout.addView(edittext);
+
+                alert.setMessage("Enter new description");
+                alert.setView(layout);
+
+                alert.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/");
+                        reference.child(User.eventid).child("eventDescription").setValue(edittext.getText().toString());
+                    }
+                });
+
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.cancel();
+                    }
+                });
+
+                alert.show();
+
+            }
+        });
+
+        editEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent edit = new Intent(getActivity(), EventEdit.class);
+                edit.putExtra("Image", image);
+                edit.putExtra("Title", name);
+                edit.putExtra("Date", date);
+                edit.putExtra("Time", time);
+                edit.putExtra("Description", description);
+                edit.putExtra("Location", location);
+                startActivity(edit);
+            }
+        });
+
     }
 
 
-    // Changes eventid of single user
-    public void changeUserFirebase(String userid,String eventid){
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
-        reference.child(userid).child("eventid").setValue(eventid);
-    }
-
-    // Removes single user from Members list
+    // Used for Regular members, NOT Admin
+    // When user leaves event, remove them from Members list
     public void removeMemberFirebase() {
         Firebase eventReference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid);
         eventReference.child("Members").child(User.uid).removeValue();
     }
 
-    // Changes eventid of all users
+    // Changes eventid of ALL users to null when the Admin leaves event
+    // Reference Members list of the current event
+    // Retrieve each member and change eventid to null
     public void changeAllUserFirebase(){
-        // Change eventid of all member to "null"
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+eventid+"/Members");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot child : dataSnapshot.getChildren() ){
-                    // Get each member
                     String memberid = child.child("uid").getValue().toString();
                     changeUserFirebase(memberid, "null");
-                    Log.i("ViewEventsFragment", "Deleted all users");
-
                 }
             }
             @Override
@@ -190,11 +259,41 @@ public class ViewEventsFragment extends Fragment {
         });
     }
 
-    // Delete event
-    public void deleteEvent(){
+    // Changes eventid of single user
+    public void changeUserFirebase(String userid, String eventid){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+        reference.child(userid).child("eventid").setValue(eventid);
+    }
+
+    // Remove the entire event from Firebase
+    public void deleteEvent(String eventid){
+        Log.i("Main", "Deleting Event from View");
+        Log.i("Main", "DELETED " + eventid);
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
         reference.child(eventid).removeValue();
     }
 
+
+    /*
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode != RESULT_CANCELED) {
+            switch (requestCode) {
+                case 0:
+                    // Image picker - Choosing camera
+                    if (resultCode == RESULT_OK && data != null) {
+                        Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
+                        // Set bitmap to user => used when pushing to firebase
+                        User.bitmap = convertToBase64(selectedImage);
+                        // Hide the textview
+                        chooseImageTextView.setVisibility(View.INVISIBLE);
+                        eventImage.setImageBitmap(selectedImage);
+                    }
+                    break;
+
+            }
+        }
+    }
+*/
 
 }

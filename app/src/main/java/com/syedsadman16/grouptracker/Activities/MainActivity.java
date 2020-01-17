@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         final Fragment fragment2 = new ChatFragment();
         final Fragment fragment3 = new MapsFragment();
 
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -47,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.event_button:
                         Log.i("ViewEventsFragment", "MainActivity: "+User.eventid);
                         // Check to see if user is already in an event
-                        if(User.eventid.equals("null")) {
-                            fragment = fragment1;
+                        if(!User.eventid.equals("null")) {
+                            Log.i("Main", "EVENTID "+ User.eventid);
+                            fragment = fragment1b;
                         }
                         else {
-                            fragment = fragment1b;
+                            fragment = fragment1;
                         }
                         break;
 
@@ -74,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.event_button);
 
 
+    }
+
+
+    // Remove the entire event from Firebase
+    public void deleteEvent(String eventid){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.child(eventid).removeValue();
     }
 
     @Override
