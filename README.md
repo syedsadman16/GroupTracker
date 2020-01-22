@@ -25,9 +25,10 @@ The app has the following features:
     * [ ] Admin can remove members from group
 * [ ] Configure Shared Map
     * [ ] Show marker for all members
-    * [ ] Enable live preview
-    * [ ] Set common destination marker
-    * [ ] Broadcast message 
+    * [ ] Click to zoom into member
+    * [X] Enable live preview
+    * [ ] Set common destination 
+    * [ ] Show text over marker 
 * [ ] Group chats 
 * [ ] Photo Sharing
 * [ ] TBA
@@ -43,11 +44,19 @@ Preview
 
 
 ## Notes
+ToDo: Google Maps Integration
+Single user >> Multi User
+Firebase, each user will have Lat, Long, message. 
+Update coordinates for each user(current user). Push to Firebase every 2-3 seconds.
+Firebase onDataChanged will add marker each time member moves: 
+        LatLng user = new LatLng(-34, 151); // LatLng(long, lat)
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Name of person"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(user));
+onResume: Keeep updating coordinates and onStop: remove listener
+
+
 Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db. Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
 
-ToDo:
-If user clicks edit, launch event creation again
-Call alert dialog for description
 
 Bugs/Challenges:
 - Allowing users to join and leave events => create static User.eventid and use MainActivity to redirect to appropriate event. Also update firebase Users.json with an eventid status and maintain a members list in Events.json
@@ -81,11 +90,12 @@ https://demonuts.com/pick-image-gallery-camera-android/
 Using PlaceAUtoCompleteFragment to get location
 https://developers.google.com/places/android-sdk/autocomplete
 https://www.youtube.com/watch?v=6Trdd9EnmqY
-
-PlacesAPI Autocomplete
 https://medium.com/skillhive/android-google-places-autocomplete-feature-bb3064308f05
 
+Location
+https://stackoverflow.com/questions/10311834/how-to-check-if-location-services-are-enabled
 https://www.youtube.com/playlist?list=PLgCYzUzKIBE-SZUrVOsbYMzH7tPigT3gi
+
 https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d794c2
 
 ## License
