@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
@@ -65,51 +67,60 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
     }
 
+
+    // Handling the map events
     @Override
     public void onMapReady(GoogleMap map) {
 
         // Checking if location is enabled
-        //ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 12);
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
         boolean network_enabled = false;
 
+        // GPS Provider
         try {
             // Enable blue dot on map with ui control
             // Get animated Zooming effect
             // Suppressed permission check since its already handled above
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             map.setMyLocationEnabled(true);
-
             @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+            setCoordsCurrentUser(location);
+        } catch(Exception ex) { ex.printStackTrace(); }
 
-            } catch(Exception ex) { ex.printStackTrace(); }
-
-            try {
+        // Same but with Network Provider
+        try {
                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                 map.setMyLocationEnabled(true);
                 @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+            setCoordsCurrentUser(location);
+        } catch(Exception ex) { ex.printStackTrace(); }
 
-            } catch(Exception ex) { ex.printStackTrace(); }
-
-            // If location is not enabled, prompt user
-            if(!gps_enabled && !network_enabled) {
-                // notify user
-                new AlertDialog.Builder(getActivity())
-                        .setMessage("Location is not enabled")
-                        .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+        // If location is not enabled, prompt user with Alert Dialog
+        if(!gps_enabled && !network_enabled) {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("Location is not enabled")
+                    .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                getActivity().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                            }
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) { getActivity().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)); }
                         })
-                                .setNegativeButton("Cancel",null)
-                                .show();
-            }
+                    .setNegativeButton("Cancel",null)
+                    .show();
+        }
 
     }
+
+
+
+    // Update coordinates of user to Firebase
+    public void setCoordsCurrentUser(Location location){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+        reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
+        reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
+    }
+
 
 
     // Lifecycle required for MapView
@@ -129,6 +140,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     public void onStop() {
         super.onStop();
         mapView.onStop();
+        // Stop listener
     }
 
     @Override
@@ -139,8 +151,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onDestroy() {
-        mapView.onDestroy();
         super.onDestroy();
+        mapView.onDestroy();
+        // Stop listener
     }
 
     @Override

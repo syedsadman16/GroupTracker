@@ -150,7 +150,7 @@ public class ViewEventsFragment extends Fragment {
                 // Admin permissions. Compare uid retrieved from event with User.uid
                 // First update Firebase by changing each members  eventid to "null"
                 // Switch to MainActivity => Default EventsFragment
-                // Unregister the reference and delete the event
+                // Unregister the listener and delete the event
                 if(uid.equals(User.uid)){
                     changeAllUserFirebase();
                     final String tempEventId = User.eventid;

@@ -154,18 +154,11 @@ public class EventCreation extends AppCompatActivity {
         // Change Users event status
         User.eventid = key;
 
-        Log.i("EventCreation", "(1/3) Created Key");
-
         // Create Events object and push it to database
         Events events = new Events(key, createdBy, Date, Description, Image, Location, Name, Password, Time, uid);
-
-        Log.i("EventCreation", "(2/3) Created Events object");
-
         reference.child(key).setValue(events);
         // Create a members list
         reference.child(key).child("Members").child(User.uid).child("uid").setValue(User.uid);
-
-        Log.i("EventCreation", "(3/3) Pushed to Firebase");
 
         Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
     }
