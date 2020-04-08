@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,7 +77,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
         boolean network_enabled = false;
-
+        Log.i("Locationabc", "Reached mapOnReady()");
         // GPS Provider
         try {
             // Enable blue dot on map with ui control
@@ -86,7 +87,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             map.setMyLocationEnabled(true);
             @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
             setCoordsCurrentUser(location);
+            Log.i("Locationabc", "Reached Here A");
         } catch(Exception ex) { ex.printStackTrace(); }
 
         // Same but with Network Provider
@@ -94,8 +98,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
                 map.setMyLocationEnabled(true);
                 @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
             setCoordsCurrentUser(location);
+            Log.i("Locationabc", "Reached Here B");
         } catch(Exception ex) { ex.printStackTrace(); }
 
         // If location is not enabled, prompt user with Alert Dialog
@@ -113,13 +120,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-
     // Update coordinates of user to Firebase
     public void setCoordsCurrentUser(Location location){
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
         reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
         reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
     }
+
+
 
 
 
