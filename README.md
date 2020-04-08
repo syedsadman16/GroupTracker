@@ -87,8 +87,8 @@ Profile:
   - Even if I delete it from random activity such as MapActivity, it automatically goes into ViewEventsFragment and crashes. Every deletion seems to be linked to ViewEventsFragment 
   - Switch to Main, wait 5 seconds, then delete event. After the 5 seconds, app crashes in ViewEventsFragment. It switches intents, loads new fragment, waits 5 seconds then crashes in the previous fragment. 
   - The only way to get to ViewEventsFragment is if User.eventid != "null". However, app ignores this and crashes in ViewEventsFragment even though I manually changed User.eventid to "null" upon deletion. 
-  ==> Restructure and add a removeEventListener. When I added an addEventListenr,.it was ALWAYS listening for onDataChanged. When event was deleted, this was set to null so it was trying to fetch null data which caused it to crash. Every listener registered needs to be unreggistered!
-  - Getting each members location only when logged in
+  ==> Restructure and add a removeEventListener. When I added an addEventListenr,it was ALWAYS listening for onDataChanged. When event was deleted, this was set to null so it was trying to fetch null data which caused it to crash. Every listener registered needs to be unreggistered!
+  - Location doesnt work despite beign turned on --> Enable in app location permissions
 
 
 ## Resources Used

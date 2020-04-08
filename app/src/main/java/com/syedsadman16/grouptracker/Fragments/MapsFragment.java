@@ -69,40 +69,29 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-    // Handling the map events
     @Override
     public void onMapReady(GoogleMap map) {
 
-        // Checking if location is enabled
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
         boolean network_enabled = false;
-        Log.i("Locationabc", "Reached mapOnReady()");
-        // GPS Provider
+
+        // Enable blue dot on map with zoom effect
+        // Suppressed permission check since its already handled above
         try {
-            // Enable blue dot on map with ui control
-            // Get animated Zooming effect
-            // Suppressed permission check since its already handled above
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             map.setMyLocationEnabled(true);
             @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
             setCoordsCurrentUser(location);
-            Log.i("Locationabc", "Reached Here A");
         } catch(Exception ex) { ex.printStackTrace(); }
 
-        // Same but with Network Provider
         try {
-                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                map.setMyLocationEnabled(true);
-                @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            map.setMyLocationEnabled(true);
+            @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
             setCoordsCurrentUser(location);
-            Log.i("Locationabc", "Reached Here B");
         } catch(Exception ex) { ex.printStackTrace(); }
 
         // If location is not enabled, prompt user with Alert Dialog
@@ -117,6 +106,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     .show();
         }
 
+        // If app location permission declined, ask to grant access
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("Please grant access to location permissions.")
+                    .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getContext().getPackageName()));
+                            myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                            myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(myAppSettings);
+                        }
+                    })
+                    .setNegativeButton("Cancel",null)
+                    .show();
+        }
+
     }
 
 
@@ -127,7 +134,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
     }
 
-
+   // public void getMemberLocations()
 
 
 
