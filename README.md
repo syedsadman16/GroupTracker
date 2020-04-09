@@ -98,7 +98,7 @@ https://stackoverflow.com/questions/36117882/is-it-possible-to-store-image-to-fi
 https://www.thecrazyprogrammer.com/2016/10/android-convert-image-base64-string-base64-string-image.html
 https://demonuts.com/pick-image-gallery-camera-android/
 
-Using PlaceAUtoCompleteFragment to get location
+Search event location
 https://developers.google.com/places/android-sdk/autocomplete
 https://www.youtube.com/watch?v=6Trdd9EnmqY
 https://medium.com/skillhive/android-google-places-autocomplete-feature-bb3064308f05
@@ -106,8 +106,9 @@ https://medium.com/skillhive/android-google-places-autocomplete-feature-bb306430
 Location
 https://stackoverflow.com/questions/10311834/how-to-check-if-location-services-are-enabled
 https://www.youtube.com/playlist?list=PLgCYzUzKIBE-SZUrVOsbYMzH7tPigT3gi
-
 https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d794c2
+- Follow user location
+https://stackoverflow.com/questions/44992014/how-to-get-current-location-in-googlemap-using-fusedlocationproviderclient
 
 
 ## License
@@ -125,3 +126,5 @@ https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d7
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+
