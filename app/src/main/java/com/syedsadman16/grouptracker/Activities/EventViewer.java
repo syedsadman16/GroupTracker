@@ -31,14 +31,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+//=============================================================================
+// Populates recyclerview with list of events
+// Joining event handled in EventsAdapter
+//
+//=============================================================================
+
 public class EventViewer extends AppCompatActivity {
 
     ArrayList<Events> eventsArrayList = new ArrayList<>();
     String eventid, date, time, description, image, location, name ,password, createdBy, uid;
 
-    /*
-     * Just for viewing events. To Join events, check EventsAdapter
-     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

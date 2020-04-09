@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
@@ -49,6 +50,9 @@ import com.syedsadman16.grouptracker.R;
 //=============================================================================
 // Displays the shared map
 //
+// Notes:
+// The setCoordsCurrentUser() updates latlng of individual users which will
+// eventually generate latlng for all the users who use the map
 //=============================================================================
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
@@ -103,7 +107,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         // Set level of accuracy for location requests
         locationRequest = LocationRequest.create();
-        locationRequest.setInterval(10000); // rate app prefers to receive location updates
+        locationRequest.setInterval(10000); // time interval to receive location updates
         locationRequest.setFastestInterval(5000); // fastest at which device can handle updates
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -116,6 +120,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
             startLocationUpdates();
+            getMemberLocations();
         } catch(Exception ex) { ex.printStackTrace(); }
 
         try {
@@ -124,15 +129,15 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
             startLocationUpdates();
+            getMemberLocations();
         } catch(Exception ex) { ex.printStackTrace(); }
 
         // If access not granted, request user
         checkAccess(gps_enabled, network_enabled);
 
-
     }
 
-    // Each time location is changed
+    // Each time location is changed, update database
     LocationCallback locationCallback = new LocationCallback() {
         @SuppressLint("MissingPermission")
         @Override
@@ -140,27 +145,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             if (locationResult == null)
                 return;
 
-            for (Location location : locationResult.getLocations()) {
-
-                if (mCurrLocationMarker != null)
-                    mCurrLocationMarker.remove();
-
-                    //Place current location marker
-                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(latLng);
-                    markerOptions.title("Current Position");
-                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-                    mCurrLocationMarker = googleMap.addMarker(markerOptions);
-                    //move map camera
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                    setCoordsCurrentUser(location);
+            for (final Location location : locationResult.getLocations()) {
+               // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+               // googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                setCoordsCurrentUser(location);
             }
         }
     };
 
-
+    // Check location permissions and status
     public void checkAccess(boolean gps_enabled, boolean network_enabled){
+
         // If location is not enabled, prompt user with Alert Dialog
         if(!gps_enabled && !network_enabled) {
             new AlertDialog.Builder(getActivity())
@@ -192,38 +187,62 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    // Update coordinates of user to Firebase
+
+
     public void setCoordsCurrentUser(Location location){
+        // Update coordinates for specific user
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
         reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
         reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
+
+        // Update coordinate in Members list
+        Firebase event_reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid);
+        event_reference.child("Members").child(User.uid).child("Latitude").setValue(location.getLatitude());
+        event_reference.child("Members").child(User.uid).child("Longitude").setValue(location.getLongitude());
     }
 
-    // Get coordinates of all users IF user is in event
+
+    // Get coordinates of all users IF user is in event AND user has coordinates
     public void getMemberLocations() {
         if(!User.eventid.equals("null")){
+
             Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid+"/Members");
             reference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for(DataSnapshot child : dataSnapshot.getChildren() ){
-                        //String longitude = child.child("Longitude").getValue().toString();
-                        //String latitude = child.child("Latitude").getValue().toString();
-                        // changeUserFirebase(memberid, "null");
+                        String longitude = child.child("Longitude").getValue().toString();
+                        String latitude = child.child("Latitude").getValue().toString();
+                        String name = child.child("name").getValue().toString();
+                        LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                        createMarker(latLng, name);
                     }
                 }
                 @Override
                 public void onCancelled(FirebaseError firebaseError) {}
             });
+
+        } else {
+            Toast.makeText(getContext(), "Event error", Toast.LENGTH_SHORT).show();
         }
     }
 
+    // Mark location on map
+    public void createMarker(LatLng latLng, String username){
+        if (mCurrLocationMarker != null) {
+            mCurrLocationMarker.remove();
+        }
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title(username);
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        mCurrLocationMarker = googleMap.addMarker(markerOptions);
+    }
 
-    // Location updates when needed; saves battery
+
     private void startLocationUpdates() {
-        fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback,
-                Looper.getMainLooper());
+        // Looper tells it to repeat forever until thread is destroyed
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     private void stopLocationUpdates() {

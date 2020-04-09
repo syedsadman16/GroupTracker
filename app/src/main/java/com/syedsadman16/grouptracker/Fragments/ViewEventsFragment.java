@@ -70,9 +70,7 @@ public class ViewEventsFragment extends Fragment {
     TextView nameTextView, timeTextView, locationTextView, detailsTextView;
     ImageView eventImageView;
 
-    public ViewEventsFragment() {
-        // Required empty public constructor
-    }
+    public ViewEventsFragment() { } // Required empty constructor
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -141,8 +139,7 @@ public class ViewEventsFragment extends Fragment {
         });
 
 
-        // When the user leaves group
-        // Admin and Member have different permissions
+        // When admin leaves, delete event. When user leaves, change user eventid
         leaveGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
