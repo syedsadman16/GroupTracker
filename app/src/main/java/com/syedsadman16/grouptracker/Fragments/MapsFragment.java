@@ -2,11 +2,14 @@ package com.syedsadman16.grouptracker.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -44,15 +47,21 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
+
+import java.io.IOException;
+import java.util.List;
 
 //=============================================================================
 // Displays the shared map
 //
 // Notes:
-// The setCoordsCurrentUser() updates latlng of individual users which will
+// - The setCoordsCurrentUser() updates latlng of individual users which will
 // eventually generate latlng for all the users who use the map
+// - Fused location chooses the best location provider and optimizes
+// devices use of battery
 //=============================================================================
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
@@ -86,19 +95,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
-
         mapView = (MapView) view.findViewById(R.id.mapView);
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
 
-
     }
 
 
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(final GoogleMap map) {
 
         googleMap = map;
         LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -111,29 +118,28 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         locationRequest.setFastestInterval(5000); // fastest at which device can handle updates
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-
-        // Enable blue dot on map with zoom effect
-        // Suppressed permission check since its already handled above
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            map.setMyLocationEnabled(true);
-            @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
-            startLocationUpdates();
-            getMemberLocations();
-        } catch(Exception ex) { ex.printStackTrace(); }
-
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            map.setMyLocationEnabled(true);
-            @SuppressLint("MissingPermission") Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
-            startLocationUpdates();
-            getMemberLocations();
-        } catch(Exception ex) { ex.printStackTrace(); }
-
-        // If access not granted, request user
+        // Check if network or gps is enabled
+        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         checkAccess(gps_enabled, network_enabled);
+
+        // Locate user with blue dot
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener((Activity) getContext(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            map.setMyLocationEnabled(true);
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+                            startLocationUpdates();
+                            getMemberLocations();
+                        } else {
+                            Toast.makeText(getContext(), "Location Error", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
 
     }
 
@@ -237,6 +243,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         markerOptions.title(username);
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = googleMap.addMarker(markerOptions);
+    }
+
+    public LatLng getLocationFromAddress(Context context,String strAddress) {
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+        try {
+
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+
+            Address location = address.get(0);
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (IOException ex) { ex.printStackTrace(); }
+        return p1;
     }
 
 

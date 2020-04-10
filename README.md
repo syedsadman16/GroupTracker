@@ -1,7 +1,7 @@
 # Group Tracker
 
 
-Group Tracker is an Android application that provides users with an interface designed to help make traveling easier and safer. Users can join or create events, communicate in a group chat and share their location with other group members. The map will display a live location of all members in the group and allow them to set messages or alerts. 
+Group Tracker is an Android application that makes it easier to plan trips with friends. Users can join or create events, communicate in a group chat and share their location with each other. The map displays live locations of all members in the group to make it easier to meet up and plan their commute. 
 
 Developer: **Syed Sadman**
 

@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         final Fragment fragment1b = new ViewEventsFragment(); // Joined event
         final Fragment fragment2 = new ChatFragment();
         final Fragment fragment3 = new MapsFragment();
-
+        //final Fragment fragment4 = new UserFragment();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -65,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.map_button:
                         fragment = fragment3;
                         break;
+
+                   // case R.id.profile_button:
+                        //fragment = fragment4;
+                      //  FirebaseAuth.getInstance().signOut();
+                      //  startActivity(new Intent(getActivity(), SignIn.class));
+                     //   break;
+
 
                     default: return true;
                 }
