@@ -78,8 +78,6 @@ public class EventViewer extends AppCompatActivity {
                     // Adding to events object for future use
                     Events event = new Events(name, createdBy, date, eventid, image);
                     eventsArrayList.add(event);
-
-
                 }
                 adapter.notifyDataSetChanged();
             }

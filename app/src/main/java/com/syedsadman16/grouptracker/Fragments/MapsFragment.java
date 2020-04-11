@@ -19,6 +19,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -48,10 +50,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.syedsadman16.grouptracker.Adapters.EventsAdapter;
+import com.syedsadman16.grouptracker.Adapters.UserListAdapter;
+import com.syedsadman16.grouptracker.Models.Members;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 //=============================================================================
@@ -68,9 +75,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private MapView mapView;
     GoogleMap googleMap;
+    ArrayList<Members> membersArrayList = new ArrayList<>();
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     LocationRequest locationRequest;
     Marker mCurrLocationMarker;
+    RecyclerView memberRecyclerView;
     private FusedLocationProviderClient fusedLocationClient;
 
     public MapsFragment() {
@@ -100,6 +109,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
+
+         memberRecyclerView = view.findViewById(R.id.member_list);
+        memberRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+
 
     }
 
@@ -196,6 +211,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
 
     public void setCoordsCurrentUser(Location location){
+
         // Update coordinates for specific user
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
         reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
@@ -208,6 +224,46 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    // Trying to retrieve all the information for a user
+    // Create function to get member UID. This will be onside datasnapshot which is a loop
+    // so call another function getMemberInformation(String UID)
+    // Inside this function, we get all the member information.
+    // Returns profile image, name, long and lat
+    // With the long and lat, it will create markers for each member. With other info, it
+    // will populate users list
+    // Call the previous function which will automatically call getMemberInformation (marker and populate list)
+
+    //this function can get everything esle
+    // Get this speciofic user thats in an event; cant just loop users object since only some users in event
+    public void getMemberInformation(String userid){
+        final UserListAdapter adapter = new UserListAdapter(getContext(), membersArrayList);
+        memberRecyclerView.setAdapter(adapter);
+
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + userid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                    String longitude = dataSnapshot.child("Longitude").getValue().toString();
+                    String latitude = dataSnapshot.child("Latitude").getValue().toString();
+                    String name = dataSnapshot.child("First Name").getValue().toString();
+                    LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                    createMarker(latLng, name);
+                    Members member = new Members(name, latitude, longitude);
+                    membersArrayList.add(member);
+                    adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+    }
+
+
+    // Make this repsonsible just for getting userid
     // Get coordinates of all users IF user is in event AND user has coordinates
     public void getMemberLocations() {
         if(!User.eventid.equals("null")){
@@ -217,11 +273,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for(DataSnapshot child : dataSnapshot.getChildren() ){
-                        String longitude = child.child("Longitude").getValue().toString();
-                        String latitude = child.child("Latitude").getValue().toString();
-                        String name = child.child("name").getValue().toString();
-                        LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                        createMarker(latLng, name);
+                        String userid = child.child("uid").getValue().toString();
+                        getMemberInformation(userid);
                     }
                 }
                 @Override
@@ -232,6 +285,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             Toast.makeText(getContext(), "Event error", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     // Mark location on map
     public void createMarker(LatLng latLng, String username){
@@ -245,6 +299,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mCurrLocationMarker = googleMap.addMarker(markerOptions);
     }
 
+    // Used to create marker
     public LatLng getLocationFromAddress(Context context,String strAddress) {
         Geocoder coder = new Geocoder(context);
         List<Address> address;
