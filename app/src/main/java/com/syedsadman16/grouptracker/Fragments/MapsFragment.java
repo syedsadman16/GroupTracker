@@ -15,14 +15,11 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
@@ -40,24 +37,22 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.syedsadman16.grouptracker.Adapters.EventsAdapter;
 import com.syedsadman16.grouptracker.Adapters.UserListAdapter;
 import com.syedsadman16.grouptracker.Models.Members;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,18 +64,19 @@ import java.util.List;
 // eventually generate latlng for all the users who use the map
 // - Fused location chooses the best location provider and optimizes
 // devices use of battery
+// - Implemented interface from UserListAdapter to handle list clicks
 //=============================================================================
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, UserListAdapter.UserListClickListener{
 
+    private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
+    private FusedLocationProviderClient fusedLocationClient;
     private MapView mapView;
     GoogleMap googleMap;
-    ArrayList<Members> membersArrayList = new ArrayList<>();
-    private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     LocationRequest locationRequest;
     Marker mCurrLocationMarker;
     RecyclerView memberRecyclerView;
-    private FusedLocationProviderClient fusedLocationClient;
+    ArrayList<Members> membersArrayList = new ArrayList<>();
 
     public MapsFragment() {
         // Required empty public constructor
@@ -93,7 +89,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-    // After View has been inflated, reference all the methods that need to be called
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
@@ -110,12 +105,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
 
-         memberRecyclerView = view.findViewById(R.id.member_list);
+        memberRecyclerView = view.findViewById(R.id.member_list);
         memberRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
-
-
     }
 
 
@@ -138,7 +129,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         checkAccess(gps_enabled, network_enabled);
 
-        // Locate user with blue dot
+        // Locate user with blue dot and display other members on map
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener((Activity) getContext(), new OnSuccessListener<Location>() {
                     @Override
@@ -156,6 +147,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 });
 
 
+
     }
 
     // Each time location is changed, update database
@@ -166,13 +158,63 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             if (locationResult == null)
                 return;
 
-            for (final Location location : locationResult.getLocations()) {
-               // LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-               // googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+            for (final Location location : locationResult.getLocations()) { ;
                 setCoordsCurrentUser(location);
             }
         }
     };
+
+    public void setCoordsCurrentUser(Location location){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+        reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
+        reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
+    }
+
+
+    // Get the UserID for each group member
+    public void getMemberLocations() {
+        if(!User.eventid.equals("null")){
+            final UserListAdapter adapter = new UserListAdapter(getContext(), membersArrayList, this );
+            memberRecyclerView.setAdapter(adapter);
+            Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid+"/Members");
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for(DataSnapshot child : dataSnapshot.getChildren() ){
+                        String userid = child.child("uid").getValue().toString();
+                        String full_name = child.child("fullName").getValue().toString();
+                        getMemberLocationInformation(userid);
+                        Members member = new Members(full_name, userid);
+                        membersArrayList.add(member);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+                @Override
+                public void onCancelled(FirebaseError firebaseError) { firebaseError.getDetails();}
+            });
+        }
+    }
+
+
+    // Using the UserID, marks user and destination markers to map for each user
+    public void getMemberLocationInformation(String userid){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + userid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String longitude = dataSnapshot.child("Longitude").getValue().toString();
+                String latitude = dataSnapshot.child("Latitude").getValue().toString();
+                String name = dataSnapshot.child("First Name").getValue().toString();
+                LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                createMarker(latLng, name);
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) { }
+        });
+    }
+
+
+
 
     // Check location permissions and status
     public void checkAccess(boolean gps_enabled, boolean network_enabled){
@@ -208,82 +250,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-
-
-    public void setCoordsCurrentUser(Location location){
-
-        // Update coordinates for specific user
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
-        reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
-        reference.child(User.uid).child("Longitude").setValue(location.getLongitude());
-
-        // Update coordinate in Members list
-        Firebase event_reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid);
-        event_reference.child("Members").child(User.uid).child("Latitude").setValue(location.getLatitude());
-        event_reference.child("Members").child(User.uid).child("Longitude").setValue(location.getLongitude());
+    // Move to user location on map when list clicked on
+    @Override
+    public void onItemClicked(int position) {
+        String uid = membersArrayList.get(position).getUserid();
+        moveCameratoLatLng(uid, googleMap);
     }
 
-
-    // Trying to retrieve all the information for a user
-    // Create function to get member UID. This will be onside datasnapshot which is a loop
-    // so call another function getMemberInformation(String UID)
-    // Inside this function, we get all the member information.
-    // Returns profile image, name, long and lat
-    // With the long and lat, it will create markers for each member. With other info, it
-    // will populate users list
-    // Call the previous function which will automatically call getMemberInformation (marker and populate list)
-
-    //this function can get everything esle
-    // Get this speciofic user thats in an event; cant just loop users object since only some users in event
-    public void getMemberInformation(String userid){
-        final UserListAdapter adapter = new UserListAdapter(getContext(), membersArrayList);
-        memberRecyclerView.setAdapter(adapter);
-
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + userid);
+    public void moveCameratoLatLng(String uid, final GoogleMap map){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + uid);
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                    String longitude = dataSnapshot.child("Longitude").getValue().toString();
-                    String latitude = dataSnapshot.child("Latitude").getValue().toString();
-                    String name = dataSnapshot.child("First Name").getValue().toString();
-                    LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                    createMarker(latLng, name);
-                    Members member = new Members(name, latitude, longitude);
-                    membersArrayList.add(member);
-                    adapter.notifyDataSetChanged();
+                String longitude = dataSnapshot.child("Longitude").getValue().toString();
+                String latitude = dataSnapshot.child("Latitude").getValue().toString();
+                LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
-
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
+            public void onCancelled(FirebaseError firebaseError) { }
         });
-
-
-    }
-
-
-    // Make this repsonsible just for getting userid
-    // Get coordinates of all users IF user is in event AND user has coordinates
-    public void getMemberLocations() {
-        if(!User.eventid.equals("null")){
-
-            Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid+"/Members");
-            reference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    for(DataSnapshot child : dataSnapshot.getChildren() ){
-                        String userid = child.child("uid").getValue().toString();
-                        getMemberInformation(userid);
-                    }
-                }
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {}
-            });
-
-        } else {
-            Toast.makeText(getContext(), "Event error", Toast.LENGTH_SHORT).show();
-        }
     }
 
 
@@ -299,26 +285,24 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mCurrLocationMarker = googleMap.addMarker(markerOptions);
     }
 
-    // Used to create marker
+    // Retrive location from string - used to map event destination
     public LatLng getLocationFromAddress(Context context,String strAddress) {
         Geocoder coder = new Geocoder(context);
         List<Address> address;
         LatLng p1 = null;
         try {
-
             address = coder.getFromLocationName(strAddress, 5);
             if (address == null) {
                 return null;
             }
-
             Address location = address.get(0);
             p1 = new LatLng(location.getLatitude(), location.getLongitude() );
-
         } catch (IOException ex) { ex.printStackTrace(); }
         return p1;
     }
 
 
+    // Calling fusedLocation to update coordinates of users movements
     private void startLocationUpdates() {
         // Looper tells it to repeat forever until thread is destroyed
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
@@ -327,7 +311,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private void stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
-
 
     // Lifecycle required for MapView
     @Override
@@ -369,4 +352,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
+
 }

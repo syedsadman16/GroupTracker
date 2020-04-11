@@ -2,7 +2,7 @@ package com.syedsadman16.grouptracker.Models;
 
 public class Members {
 
-    String name, latitude, longitude;
+    String name, fullName, userid, latitude, longitude;
 
     public Members(String mName, String mLat, String mLong){
         this.name = mName;
@@ -10,6 +10,28 @@ public class Members {
         this.longitude = mLong;
         // this,image = mImage;
     }
+
+    public Members(String mName, String mUserid){
+        this.fullName = mName;
+        this.userid = mUserid;
+    }
+
+    public String getUserid() {
+        return userid;
+    }
+
+    public void setUserid(String userid) {
+        this.userid = userid;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String full_name) {
+        this.fullName = full_name;
+    }
+
 
     public String getName() {
         return name;

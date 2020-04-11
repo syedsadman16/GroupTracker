@@ -27,6 +27,12 @@ import com.syedsadman16.grouptracker.R;
 import java.util.ArrayList;
 import java.util.List;
 
+//=============================================================================
+// Adapter when user is joining an event
+// - Populates list to show events
+// - Pushes references to firebase to update user event status
+//
+//=============================================================================
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
 
@@ -102,6 +108,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
             Firebase eventReference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
             eventReference.child(User.eventid).child("Members").child(User.uid).child("uid").setValue(User.uid); // Members list
             eventReference.child(User.eventid).child("Members").child(User.uid).child("name").setValue(User.firstName);
+            eventReference.child(User.eventid).child("Members").child(User.uid).child("fullName").setValue(User.fullName);
         }
 
 
