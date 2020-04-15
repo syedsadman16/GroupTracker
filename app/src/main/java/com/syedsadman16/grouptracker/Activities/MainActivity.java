@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
                     default: return true;
                 }
-                fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).addToBackStack(fragment3.getClass().getName()).commit();
                 return true;
             }
         });

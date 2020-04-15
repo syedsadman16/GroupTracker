@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -15,6 +18,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,10 +26,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -56,6 +63,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_GREEN;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_RED;
+
 //=============================================================================
 // Displays the shared map
 //
@@ -72,11 +82,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     private static final String MAPVIEW_BUNDLE_KEY = "MapViewBundleKey";
     private FusedLocationProviderClient fusedLocationClient;
     private MapView mapView;
+    Button destinationButton, helpButton;
     GoogleMap googleMap;
     LocationRequest locationRequest;
     Marker mCurrLocationMarker;
     RecyclerView memberRecyclerView;
     ArrayList<Members> membersArrayList = new ArrayList<>();
+    UserListAdapter adapter;
 
     public MapsFragment() {
         // Required empty public constructor
@@ -107,6 +119,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
 
         memberRecyclerView = view.findViewById(R.id.member_list);
         memberRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        destinationButton = view.findViewById(R.id.destBtn);
+        helpButton = view.findViewById(R.id.helpButton);
     }
 
 
@@ -137,7 +152,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             map.setMyLocationEnabled(true);
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
                             startLocationUpdates();
                             getMemberLocations();
                         } else {
@@ -146,7 +161,38 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                     }
                 });
 
+        destinationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getEventLocation(map);
+            }
+        });
 
+        helpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Set notifications
+            }
+        });
+    }
+
+    public void getEventLocation(final GoogleMap map){
+         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+         reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String location = dataSnapshot.child(User.eventid).child("eventLocation").getValue().toString();
+                 LatLng latlng = getLocationFromAddress(getContext(), location);
+                Log.i("Maps", "" + getLocationFromAddress(getContext(), location));
+                createMarker(latlng, "Destination", 2);
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 18.0f));
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
     }
 
@@ -174,7 +220,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     // Get the UserID for each group member
     public void getMemberLocations() {
         if(!User.eventid.equals("null")){
-            final UserListAdapter adapter = new UserListAdapter(getContext(), membersArrayList, this );
+            UserListAdapter temp = new UserListAdapter(getContext(), membersArrayList, this );
+            adapter = temp;
             memberRecyclerView.setAdapter(adapter);
             Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events/"+User.eventid+"/Members");
             reference.addValueEventListener(new ValueEventListener() {
@@ -187,16 +234,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                         Members member = new Members(full_name, userid);
                         membersArrayList.add(member);
                         adapter.notifyDataSetChanged();
+
+                       // String location = dataSnapshot.child("eventLocation").getValue().toString();
+                       // createMarker(getLocationFromAddress(getContext(), location), "Destination");
                     }
                 }
                 @Override
-                public void onCancelled(FirebaseError firebaseError) { firebaseError.getDetails();}
+                public void onCancelled(FirebaseError firebaseError) {  adapter.clear(); firebaseError.getDetails();}
             });
         }
     }
 
 
-    // Using the UserID, marks user and destination markers to map for each user
+    // Using the UserID, marks user and destination markers to map for each user. This is called from getMemberLocations
     public void getMemberLocationInformation(String userid){
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + userid);
         reference.addValueEventListener(new ValueEventListener() {
@@ -206,7 +256,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                 String latitude = dataSnapshot.child("Latitude").getValue().toString();
                 String name = dataSnapshot.child("First Name").getValue().toString();
                 LatLng latLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                createMarker(latLng, name);
+                createMarker(latLng, name, 1);
             }
             @Override
             public void onCancelled(FirebaseError firebaseError) { }
@@ -254,10 +304,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     @Override
     public void onItemClicked(int position) {
         String uid = membersArrayList.get(position).getUserid();
-        moveCameratoLatLng(uid, googleMap);
+        moveCameratoUsersLatLng(uid, googleMap);
     }
 
-    public void moveCameratoLatLng(String uid, final GoogleMap map){
+    public void moveCameratoUsersLatLng(String uid, final GoogleMap map){
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + uid);
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -274,14 +324,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
 
 
     // Mark location on map
-    public void createMarker(LatLng latLng, String username){
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
-        }
+    public void createMarker(LatLng latLng, String username, int type ){
         MarkerOptions markerOptions = new MarkerOptions();
+        if(type==1) {
+            if (mCurrLocationMarker != null) {
+                mCurrLocationMarker.remove();
+            }
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(HUE_GREEN)); // Users
+        } else {
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(HUE_RED)); // Locastions
+        }
         markerOptions.position(latLng);
         markerOptions.title(username);
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         mCurrLocationMarker = googleMap.addMarker(markerOptions);
     }
 
@@ -330,7 +384,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     public void onStop() {
         super.onStop();
         mapView.onStop();
-        // Stop listener
+        adapter.clear(); // Stop recycler data overlapping
     }
 
     @Override
@@ -338,6 +392,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         super.onPause();
         mapView.onPause();
         stopLocationUpdates();
+        adapter.clear();
     }
 
     @Override
