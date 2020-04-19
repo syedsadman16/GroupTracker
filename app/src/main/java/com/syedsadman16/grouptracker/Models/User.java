@@ -12,4 +12,14 @@ public class User {
     public static String uid = "";
     public static String bitmap = "";
 
+    public static void clear(){
+        fullName = "";
+        firstName = "";
+        email = "";
+        phone = "";
+        eventid = "";
+        uid = "";
+        bitmap = "";
+    }
+
 }

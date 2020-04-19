@@ -4,11 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -17,6 +21,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -34,6 +42,7 @@ public class SignIn extends AppCompatActivity {
     EditText getEmailField, getPasswordField;
     Button goToRegistration, signInButton;
     private FirebaseAuth mAuth;
+    ValueEventListener valueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +123,6 @@ public class SignIn extends AppCompatActivity {
                     User.phone = phoneNumber;
                     User.eventid = eventid;
                     User.uid = id;
-                    Log.i("SIGNIN", id);
 
                     Toast.makeText(getApplicationContext(), "Signing in...", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(SignIn.this, MainActivity.class));
@@ -131,6 +139,37 @@ public class SignIn extends AppCompatActivity {
         });
         RequestQueue rQueue = Volley.newRequestQueue(SignIn.this);
         rQueue.add(stringRequest);
+
+//        Firebase.setAndroidContext(getApplicationContext());
+//        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
+//        valueEventListener = new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//
+//                name = dataSnapshot.child(eventid).child("eventName").getValue().toString();
+//                date = dataSnapshot.child(eventid).child("eventDate").getValue().toString();
+//                time = dataSnapshot.child(eventid).child("eventTime").getValue().toString();
+//                description = dataSnapshot.child(eventid).child("eventDescription").getValue().toString();
+//                location = dataSnapshot.child(eventid).child("eventLocation").getValue().toString();
+//                createdBy = dataSnapshot.child(eventid).child("createdBy").getValue().toString();
+//                uid = dataSnapshot.child(eventid).child("uid").getValue().toString();
+//                image = dataSnapshot.child(eventid).child("eventImageURL").getValue().toString();
+//                User.fullName = fullName;
+//                User.firstName = firstName;
+//                User.email = email;
+//                User.phone = phoneNumber;
+//                User.eventid = eventid;
+//                User.uid = id;
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(FirebaseError firebaseError) {
+//
+//            }
+//        };
+//        reference.addValueEventListener(eventListener);
+
     }
 
 

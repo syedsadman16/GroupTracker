@@ -111,7 +111,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
             eventReference.child(User.eventid).child("Members").child(User.uid).child("fullName").setValue(User.fullName);
         }
 
-
     }
 
     // Inflating the layout file and return it to view holder

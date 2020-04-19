@@ -73,8 +73,7 @@ public class ViewEventsFragment extends Fragment {
     public ViewEventsFragment() { } // Required empty constructor
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_view_events, container, false);
     }
 
@@ -134,6 +133,7 @@ public class ViewEventsFragment extends Fragment {
             public void onClick(View v) {
                 Log.i("EventsFragment", "User has signed out");
                 FirebaseAuth.getInstance().signOut();
+                User.clear();
                 startActivity(new Intent(getActivity(), SignIn.class));
             }
         });
@@ -164,6 +164,7 @@ public class ViewEventsFragment extends Fragment {
                     removeMemberFirebase();
                     User.eventid = "null";
                     changeUserFirebase(User.uid, User.eventid);
+                    reference.removeEventListener(eventListener);
                     startActivity(new Intent(getActivity(), MainActivity.class));
                 }
             }
@@ -271,26 +272,5 @@ public class ViewEventsFragment extends Fragment {
     }
 
 
-    /*
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode != RESULT_CANCELED) {
-            switch (requestCode) {
-                case 0:
-                    // Image picker - Choosing camera
-                    if (resultCode == RESULT_OK && data != null) {
-                        Bitmap selectedImage = (Bitmap) data.getExtras().get("data");
-                        // Set bitmap to user => used when pushing to firebase
-                        User.bitmap = convertToBase64(selectedImage);
-                        // Hide the textview
-                        chooseImageTextView.setVisibility(View.INVISIBLE);
-                        eventImage.setImageBitmap(selectedImage);
-                    }
-                    break;
-
-            }
-        }
-    }
-*/
 
 }

@@ -1,7 +1,7 @@
 # Group Tracker
 
 
-Group Tracker is an Android application that makes it easier to plan trips with friends. Users can join or create events, communicate in a group chat and share their location with each other. The map displays live locations of all members in the group to make it easier to meet up and plan their commute. 
+Group Tracker is an Android application that makes it easier to plan trips with friends. Users can join or create events, communicate in a group chat and share their location with each other. The map displays live locations of all members in the group to make it easier to meet up and plan their commute. If a user is lost, they can send out a notification to all group members which contains their location, battery percentage and other useful information. 
 
 Developer: **Syed Sadman**
 
@@ -9,29 +9,26 @@ Developer: **Syed Sadman**
 # Features
 The app has the following features:
 
-* [X] Users can sign in and register  
+* [ ] User Profile
+	* [X] Sign in and register  
+	* [X] Users can set profile pictures and status
+	* [X] Edit profile information    
+
 * [ ] Create and Join events
-    * [X] Rediredct users to default or events activity
-    * [X] View/Join list of events
-    * [X] Persist joined events
+    * [X] View/Join list of events with persistence
     * [X] Create new events
-    * [X] Set images for events
-    * [X] Autocomplete location
-    * [X] Setup GPS to location
     * [X] Edit events
-    * [ ] Events can be open or password protected
-    * [ ] Allow users to be invited to an event group
-    * [ ] View all users in event
-    * [ ] Admin can remove members from group
-* [ ] Configure Shared Map
-    * [ ] Show marker for all members
-    * [ ] Click to zoom into member
-    * [X] Enable live preview
-    * [ ] Set common destination 
-    * [ ] Show text over marker 
+    * [ ] Password protected 
+
+* [ ] View Shared Map
+    * [X] Display live location for all members on map
+    * [ ] Click to move map to specific user or location
+    * [ ] Show Notifications with device detail (battery, coordinates, distance) 
+
 * [ ] Group chats 
-* [ ] Photo Sharing
-* [ ] TBA
+
+
+
 
 
 
@@ -44,28 +41,6 @@ Preview
 ## Notes
 Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db. Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
 
----
-ToDo: Google Maps Integration
-
-Single user >> Multi User
-Get user location once user clicks frag. If they leave fragment, stop listener. 
-Firebase, each user will have Lat, Long, message params >> Create it for test users
-Update coordinates for each user(current user). Push to Firebase every 2-3 seconds. >> Create function that pushes for time intervals
-Firebase onDataChanged will add marker each time member moves: >> 
-        LatLng user = new LatLng(-34, 151); // LatLng(long, lat)
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Name of person"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(user));
-onResume: Keeep updating coordinates and onStop: remove listener
-
-Button to 
-
----
-
-Events: 
-
-Chat: 
-
-Profile:
 
 
 ## Bugs/Challenges:
@@ -89,6 +64,8 @@ Profile:
   - The only way to get to ViewEventsFragment is if User.eventid != "null". However, app ignores this and crashes in ViewEventsFragment even though I manually changed User.eventid to "null" upon deletion. 
   ==> Restructure and add a removeEventListener. When I added an addEventListenr,it was ALWAYS listening for onDataChanged. When event was deleted, this was set to null so it was trying to fetch null data which caused it to crash. Every listener registered needs to be unreggistered!
   - Location doesnt work despite beign turned on --> Enable in app location permissions
+  - Recyclerview for users list overlaps users when fragment is stopped and resumed --> Clear adapter onStop()
+  - Notifications not showing up - Need to setup createNotifcationChannel() and call it onViewCreated(). Then, pass in getContext() with a string as channel_id (this must be the same as delcared in createNotificationChannel()). Notfication wont show so need to call NotifiationManagerCompat and call .notiify(...) with a unique id for each notification. 
 
 
 ## Resources Used
@@ -110,6 +87,9 @@ https://medium.com/@shubham9032/structure-for-group-chat-using-firebase-583a84d7
 - Follow user location
 https://stackoverflow.com/questions/44992014/how-to-get-current-location-in-googlemap-using-fusedlocationproviderclient
 
+Notifications
+https://developer.android.com/training/notify-user/build-notification
+https://code.tutsplus.com/tutorials/android-o-how-to-use-notification-channels--cms-28616
 
 ## License
 

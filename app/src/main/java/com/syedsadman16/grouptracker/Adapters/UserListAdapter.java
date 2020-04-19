@@ -84,14 +84,8 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
 
         public void populateView(Members member) {
             user_name.setText(member.getFullName());
-            user_distance.setText("Write Function To Calculate Distance");
+            //user_distance.setText("Write Function To Calculate Distance");
 
-            // Take base64 string and decode into byte array
-            //byte[] imageBytes2 = Base64.decode(events.getEventPicture(), Base64.DEFAULT);
-            // Convert the byte array into a Bitmap
-            //Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
-            //eventImage.setScaleType(ImageView.ScaleType.FIT_XY);
-            //eventImage.setImageBitmap(decodedImage);
 
         }
 

@@ -32,9 +32,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 //=============================================================================
+// Called after user clicks 'Join'
 // Populates recyclerview with list of events
 // Joining event handled in EventsAdapter
-//
 //=============================================================================
 
 public class EventViewer extends AppCompatActivity {
@@ -85,7 +85,6 @@ public class EventViewer extends AppCompatActivity {
             @Override
             public void onCancelled(FirebaseError firebaseError) {}
         });
-
     }
 
     // Remove the entire event from Firebase
@@ -93,8 +92,6 @@ public class EventViewer extends AppCompatActivity {
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
         reference.child(User.eventid).removeValue();
     }
-
-
 
 
 }

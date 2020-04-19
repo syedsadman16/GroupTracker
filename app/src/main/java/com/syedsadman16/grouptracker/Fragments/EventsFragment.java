@@ -15,12 +15,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.syedsadman16.grouptracker.Activities.EventCreation;
 import com.syedsadman16.grouptracker.Activities.EventViewer;
 import com.syedsadman16.grouptracker.Activities.SignIn;
+import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
 //=============================================================================
 // Initial screen when user is not in an event
-// Join launches EventViewer.java Activity
-// Create launches EventCreation.java Activity
+// 'Join' launches EventViewer.java Activity
+// 'Create' launches EventCreation.java Activity
 //=============================================================================
 
 public class EventsFragment extends Fragment {
@@ -52,6 +53,7 @@ public class EventsFragment extends Fragment {
             public void onClick(View v) {
                 Log.i("EventsFragment", "User has signed out");
                 FirebaseAuth.getInstance().signOut();
+                User.clear();
                 startActivity(new Intent(getActivity(), SignIn.class));
             }
         });

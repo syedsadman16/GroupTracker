@@ -4,6 +4,10 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,9 +20,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +37,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -54,6 +61,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.syedsadman16.grouptracker.Activities.MainActivity;
 import com.syedsadman16.grouptracker.Adapters.UserListAdapter;
 import com.syedsadman16.grouptracker.Models.Members;
 import com.syedsadman16.grouptracker.Models.User;
@@ -89,6 +97,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     RecyclerView memberRecyclerView;
     ArrayList<Members> membersArrayList = new ArrayList<>();
     UserListAdapter adapter;
+    MarkerOptions markerOptions;
 
     public MapsFragment() {
         // Required empty public constructor
@@ -111,6 +120,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         if (savedInstanceState != null) {
             mapViewBundle = savedInstanceState.getBundle(MAPVIEW_BUNDLE_KEY);
         }
+
         mapView = (MapView) view.findViewById(R.id.mapView);
         mapView.onCreate(mapViewBundle);
         mapView.getMapAsync(this);
@@ -122,6 +132,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
 
         destinationButton = view.findViewById(R.id.destBtn);
         helpButton = view.findViewById(R.id.helpButton);
+
+        createNotificationChannel();
     }
 
 
@@ -153,8 +165,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                         if (location != null) {
                             map.setMyLocationEnabled(true);
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
-                            startLocationUpdates();
-                            getMemberLocations();
+                            if(User.eventid != "null") {
+                                notificationListener();
+                                startLocationUpdates();
+                                getMemberLocations();
+                            }
                         } else {
                             Toast.makeText(getContext(), "Location Error", Toast.LENGTH_SHORT).show();
                         }
@@ -171,9 +186,72 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         helpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Set notifications
+                setFirebaseNotificationStatus(User.fullName+ " needs help!");
             }
         });
+    }
+
+
+    // Notification status
+    // If user requests notification, update event field in firebase
+    // Set a listener. Each time data changes create notification. Reset it to null after notification is over.
+    public void notificationListener(){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String notificationStatus = dataSnapshot.child(User.eventid).child("notificationStatus").getValue().toString();
+                Log.i("Maps", notificationStatus);
+                if(!notificationStatus.equals("null")){
+                  createNotification(1, "GroupTracker *ALERT*", notificationStatus);
+                }
+                // Change it back to null so the next time app launches, notification isn't registered
+                setFirebaseNotificationStatus("null");
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) { }
+        });
+    }
+
+    public void setFirebaseNotificationStatus(String message){
+        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/events");
+        reference.child(User.eventid).child("notificationStatus").setValue(message);
+    }
+
+    public void createNotification(int id, String title, String content){
+        Intent intent = new Intent(getContext(), MainActivity.class);
+        // Set flags to preserve users back button
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "MapsNotification")
+                .setSmallIcon(R.drawable.chat_icon_24dp)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(id, builder.build());
+    }
+
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "GroupTracker";
+            String description = "Emergency location notification";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel("MapsNotification", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getActivity().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     public void getEventLocation(final GoogleMap map){
@@ -182,34 +260,31 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String location = dataSnapshot.child(User.eventid).child("eventLocation").getValue().toString();
-                 LatLng latlng = getLocationFromAddress(getContext(), location);
-                Log.i("Maps", "" + getLocationFromAddress(getContext(), location));
+                LatLng latlng = getLocationFromAddress(getContext(), location);
                 createMarker(latlng, "Destination", 2);
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, 18.0f));
             }
-
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
+            public void onCancelled(FirebaseError firebaseError) { }
         });
 
     }
 
-    // Each time location is changed, update database
+    // Each time location of current user changes, update database
     LocationCallback locationCallback = new LocationCallback() {
         @SuppressLint("MissingPermission")
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult == null)
                 return;
-
-            for (final Location location : locationResult.getLocations()) { ;
+            for (Location location : locationResult.getLocations()) { ;
                 setCoordsCurrentUser(location);
             }
         }
     };
 
+
+    // Update coordinates in firebase
     public void setCoordsCurrentUser(Location location){
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users");
         reference.child(User.uid).child("Latitude").setValue(location.getLatitude());
@@ -217,7 +292,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     }
 
 
-    // Get the UserID for each group member
+    // Retrieves userid for each member and pass it to getMemberLocationInformation()
+    // Populate user list under map
     public void getMemberLocations() {
         if(!User.eventid.equals("null")){
             UserListAdapter temp = new UserListAdapter(getContext(), membersArrayList, this );
@@ -227,6 +303,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
             reference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    adapter.clear();
                     for(DataSnapshot child : dataSnapshot.getChildren() ){
                         String userid = child.child("uid").getValue().toString();
                         String full_name = child.child("fullName").getValue().toString();
@@ -234,19 +311,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                         Members member = new Members(full_name, userid);
                         membersArrayList.add(member);
                         adapter.notifyDataSetChanged();
-
-                       // String location = dataSnapshot.child("eventLocation").getValue().toString();
-                       // createMarker(getLocationFromAddress(getContext(), location), "Destination");
                     }
                 }
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {  adapter.clear(); firebaseError.getDetails();}
+                public void onCancelled(FirebaseError firebaseError) { adapter.clear(); firebaseError.getDetails(); }
             });
         }
     }
 
 
-    // Using the UserID, marks user and destination markers to map for each user. This is called from getMemberLocations
+    // Using the UserID, marks user and destination markers to map for each user
     public void getMemberLocationInformation(String userid){
         Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/users/" + userid);
         reference.addValueEventListener(new ValueEventListener() {
@@ -262,7 +336,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
             public void onCancelled(FirebaseError firebaseError) { }
         });
     }
-
 
 
 
@@ -304,6 +377,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     @Override
     public void onItemClicked(int position) {
         String uid = membersArrayList.get(position).getUserid();
+        Toast.makeText(getContext(), "Clicked on " +membersArrayList.get(position).getName(), Toast.LENGTH_SHORT).show();
         moveCameratoUsersLatLng(uid, googleMap);
     }
 
@@ -325,14 +399,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
 
     // Mark location on map
     public void createMarker(LatLng latLng, String username, int type ){
-        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions = new MarkerOptions();
         if(type==1) {
-            if (mCurrLocationMarker != null) {
-                mCurrLocationMarker.remove();
-            }
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(HUE_GREEN)); // Users
         } else {
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(HUE_RED)); // Locastions
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(HUE_RED)); // Locations
         }
         markerOptions.position(latLng);
         markerOptions.title(username);
@@ -384,6 +455,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     public void onStop() {
         super.onStop();
         mapView.onStop();
+        stopLocationUpdates();
         adapter.clear(); // Stop recycler data overlapping
     }
 
@@ -392,7 +464,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         super.onPause();
         mapView.onPause();
         stopLocationUpdates();
-        adapter.clear();
     }
 
     @Override
