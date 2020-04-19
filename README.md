@@ -12,7 +12,7 @@ The app has the following features:
 * [ ] User Profile
 	* [X] Sign in and register  
 	* [X] Users can set profile pictures and status
-	* [X] Edit profile information    
+	* [ ] Edit profile information    
 
 * [ ] Create and Join events
     * [X] View/Join list of events with persistence
@@ -22,25 +22,27 @@ The app has the following features:
 
 * [ ] View Shared Map
     * [X] Display live location for all members on map
-    * [ ] Click to move map to specific user or location
-    * [ ] Show Notifications with device detail (battery, coordinates, distance) 
+    * [X] Click to move map to specific user or location
+    * [X] Show Notifications for users that need help
+	* [ ] TBD
 
 * [ ] Group chats 
 
 
 
+Maps Update
 
+<img src='demo4.gif' title='Maps' width='' alt='Demo' /> 
 
+Event Viewer Update           
 
-Preview             
-:-------------------------:
-<img src='demo3.gif' title='Demo' width='' alt='Demo' /> 
+<img src='demo3.gif' title='Events' width='' alt='Demo' /> 
 
 
 
 ## Notes
-Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db. Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
-
+- Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db.  Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
+- Always remember to detach listeners when needed
 
 
 ## Bugs/Challenges:

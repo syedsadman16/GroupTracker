@@ -203,7 +203,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                 String notificationStatus = dataSnapshot.child(User.eventid).child("notificationStatus").getValue().toString();
                 Log.i("Maps", notificationStatus);
                 if(!notificationStatus.equals("null")){
-                  createNotification(1, "GroupTracker *ALERT*", notificationStatus);
+                    Intent intent = new Intent(getContext(), MainActivity.class);
+                    // Set flags to preserve users back button
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, 0);
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "MapsNotification")
+                            .setSmallIcon(R.drawable.chat_icon_24dp)
+                            .setContentTitle("GroupTracker *ALERT*")
+                            .setContentText(notificationStatus)
+                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                            // Set the intent that will fire when the user taps the notification
+                            .setContentIntent(pendingIntent);
+
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
+                    // notificationId is a unique int for each notification that you must define
+                    notificationManager.notify(1, builder.build());
                 }
                 // Change it back to null so the next time app launches, notification isn't registered
                 setFirebaseNotificationStatus("null");
@@ -377,7 +392,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
     @Override
     public void onItemClicked(int position) {
         String uid = membersArrayList.get(position).getUserid();
-        Toast.makeText(getContext(), "Clicked on " +membersArrayList.get(position).getName(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), "Clicked on " +membersArrayList.get(position).getName(), Toast.LENGTH_SHORT).show();
         moveCameratoUsersLatLng(uid, googleMap);
     }
 
