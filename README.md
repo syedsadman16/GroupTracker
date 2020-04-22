@@ -26,8 +26,11 @@ The app has the following features:
     * [X] Show Notifications for users that need help
 	* [ ] TBD
 
-* [ ] Group chats 
-
+* [ ] Chat Window
+	* [ ] Multiple users can communicate 
+	* [ ] Share media
+	* [ ] Personal chats
+	* [ ] TBD 
 
 
 Maps Update
@@ -43,6 +46,7 @@ Event Viewer Update
 ## Notes
 - Firebase - Does not support arrays directly since array index is always changing and firebase is a real time db.  Creates problems when multiple users doing operations, array index shifts. Instead, it creates list of objects
 - Always remember to detach listeners when needed
+- How to set ItemClick on RecyclerView:
 
 
 ## Bugs/Challenges:
@@ -92,6 +96,10 @@ https://stackoverflow.com/questions/44992014/how-to-get-current-location-in-goog
 Notifications
 https://developer.android.com/training/notify-user/build-notification
 https://code.tutsplus.com/tutorials/android-o-how-to-use-notification-channels--cms-28616
+
+Chat
+https://www.scaledrone.com/blog/android-chat-tutorial/
+https://blog.sendbird.com/android-chat-tutorial-building-a-messaging-ui/
 
 ## License
 

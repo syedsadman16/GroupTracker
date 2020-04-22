@@ -52,7 +52,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
     }
 
 
-    // Defining references to components in RecyclerView layout
+
+    // Provides direct reference to each of the views within an item
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView eventImage;
@@ -61,7 +62,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         public TextView eventHost;
         public Button joinButton;
 
-
+        // Accept an entire item row
         public ViewHolder(View itemView) {
             super(itemView);
             eventImage = (ImageView) itemView.findViewById(R.id.eventImage);
@@ -122,7 +123,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
     }
 
 
-    // Get data from position and put into view holder
+    // Get data from position and return it to view holder
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Events event = events.get(position);
