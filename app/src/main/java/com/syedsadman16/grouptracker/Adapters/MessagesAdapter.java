@@ -43,9 +43,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
 
         public ViewHolder(View itemView) {
             super(itemView);
-
+            messageTextView = itemView.findViewById(R.id.message_body);
+            nameTextView = itemView.findViewById(R.id.sender_name);
         }
-
 
         public void populateView(final Message message) {
             messageTextView.setText(message.getMessage());

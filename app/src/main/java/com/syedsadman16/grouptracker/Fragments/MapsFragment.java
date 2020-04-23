@@ -233,26 +233,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         reference.child(User.eventid).child("notificationStatus").setValue(message);
     }
 
-    public void createNotification(int id, String title, String content){
-        Intent intent = new Intent(getContext(), MainActivity.class);
-        // Set flags to preserve users back button
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, intent, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext(), "MapsNotification")
-                .setSmallIcon(R.drawable.chat_icon_24dp)
-                .setContentTitle(title)
-                .setContentText(content)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                // Set the intent that will fire when the user taps the notification
-                .setContentIntent(pendingIntent);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getContext());
-        // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(id, builder.build());
-    }
-
-
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library

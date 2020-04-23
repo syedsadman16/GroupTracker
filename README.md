@@ -27,7 +27,7 @@ The app has the following features:
 	* [ ] TBD
 
 * [ ] Chat Window
-	* [ ] Multiple users can communicate 
+	* [X] Multiple users can communicate 
 	* [ ] Share media
 	* [ ] Personal chats
 	* [ ] TBD 

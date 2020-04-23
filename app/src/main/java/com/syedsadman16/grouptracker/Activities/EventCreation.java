@@ -159,6 +159,9 @@ public class EventCreation extends AppCompatActivity {
         reference.child(key).setValue(events);
         // Create a members list
         reference.child(key).child("Members").child(User.uid).child("uid").setValue(User.uid);
+        // Create a chat
+        String chatkey = reference.push().getKey();
+        reference.child(key).child("chatId").setValue(chatkey);
 
         Toast.makeText(getApplicationContext(), "Event Created", Toast.LENGTH_SHORT).show();
     }
