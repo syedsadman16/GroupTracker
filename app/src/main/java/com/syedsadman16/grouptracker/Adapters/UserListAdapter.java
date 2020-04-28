@@ -75,7 +75,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             super(itemView);
             user_image = (ImageView) itemView.findViewById(R.id.user_image);
             user_name = (TextView) itemView.findViewById(R.id.user_name);
-            user_distance = (TextView) itemView.findViewById(R.id.user_distance);
+           //user_distance = (TextView) itemView.findViewById(R.id.user_distance);
 
             clickListener = listClickListener;
             itemView.setOnClickListener(this);

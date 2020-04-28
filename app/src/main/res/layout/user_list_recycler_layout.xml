@@ -15,6 +15,7 @@
         android:contentDescription="TODO"
         app:srcCompat="@drawable/ic_launcher_round" />
 
+    <!--
     <TextView
         android:id="@+id/user_distance"
         android:layout_width="fill_parent"
@@ -27,13 +28,13 @@
         android:text="x miles away"
         android:textColor="@android:color/secondary_text_light"
         android:textSize="12sp" />
+        -->
 
     <TextView
         android:id="@+id/user_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_above="@id/user_distance"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@id/user_image"
@@ -41,5 +42,6 @@
         android:text="Example application"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
+    <!-- android:layout_above="@id/user_distance"-->
 
 </RelativeLayout>

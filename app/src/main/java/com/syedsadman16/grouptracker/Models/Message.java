@@ -3,12 +3,18 @@ package com.syedsadman16.grouptracker.Models;
 public class Message {
 
     String userid, time, date, message, senderName;
+    Boolean isImage;
 
-    public Message(String UID, String message, String sender, String time ){
+    public Message(String UID, String message, String sender, String time, Boolean isImage ){
         this.userid = UID;
         this.message = message;
         this.senderName = sender;
         this.time = time;
+        this.isImage = isImage;
+    }
+
+    public Boolean getImage() {
+        return isImage;
     }
 
     public String getUserid() {

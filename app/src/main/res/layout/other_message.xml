@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="10dp"
@@ -30,4 +31,11 @@
         android:textSize="18dp"
         android:text="How are you doing? This is a long message that should probably wrap."
         />
+
+    <ImageView
+        android:id="@+id/image_body"
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:background="@drawable/ic_launcher_background"
+        tools:visibility="visible" />
 </RelativeLayout>

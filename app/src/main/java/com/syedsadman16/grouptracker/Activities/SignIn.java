@@ -114,6 +114,7 @@ public class SignIn extends AppCompatActivity {
                     phoneNumber = obj.getJSONObject(id).getString("Phone Number");
                     email = obj.getJSONObject(id).getString("Email");
                     eventid = obj.getJSONObject(id).getString("eventid");
+                    password = obj.getJSONObject(id).getString("password");
                     fullName = firstName + " " + lastName;
 
                     // Add details for static User
@@ -123,6 +124,8 @@ public class SignIn extends AppCompatActivity {
                     User.phone = phoneNumber;
                     User.eventid = eventid;
                     User.uid = id;
+                    User.password = password;
+                    User.lastName = lastName;
 
                     Toast.makeText(getApplicationContext(), "Signing in...", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(SignIn.this, MainActivity.class));

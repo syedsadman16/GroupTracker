@@ -33,12 +33,18 @@ The app has the following features:
 	* [ ] TBD 
 
 
-Maps Update
+## Demos
 
+Chat and Profile
+***
+<img src='demo5.gif' title='Chat' width='' alt='Demo' /> 
+
+Maps Update
+***
 <img src='demo4.gif' title='Maps' width='' alt='Demo' /> 
 
 Event Viewer Update           
-
+***
 <img src='demo3.gif' title='Events' width='' alt='Demo' /> 
 
 
@@ -100,6 +106,9 @@ https://code.tutsplus.com/tutorials/android-o-how-to-use-notification-channels--
 Chat
 https://www.scaledrone.com/blog/android-chat-tutorial/
 https://blog.sendbird.com/android-chat-tutorial-building-a-messaging-ui/
+
+UI Kits
+https://www.uplabs.com/android
 
 ## License
 
