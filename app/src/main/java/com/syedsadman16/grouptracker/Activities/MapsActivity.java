@@ -18,6 +18,11 @@ import com.syedsadman16.grouptracker.R;
 
 import java.util.Arrays;
 
+//=============================================================================
+// When the user is searching for a location during event creation
+// or when editing event
+//=============================================================================
+
 public class MapsActivity extends AppCompatActivity {
 
     @Override

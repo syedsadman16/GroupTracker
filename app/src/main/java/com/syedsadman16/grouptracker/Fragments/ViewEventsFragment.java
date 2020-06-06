@@ -60,6 +60,7 @@ import static android.app.Activity.RESULT_OK;
 // Users can leave and Admin can delete events
 // IMPORTANT: Every time a listener is registered to an reference, it must
 //            be unregistered!!!
+// Clicking "Edit Event" launches EventEdit.java
 //=============================================================================
 
 public class ViewEventsFragment extends Fragment {
@@ -219,7 +220,7 @@ public class ViewEventsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent edit = new Intent(getActivity(), EventEdit.class);
-                edit.putExtra("Image", image);
+               // edit.putExtra("Image", image);
                 edit.putExtra("Title", name);
                 edit.putExtra("Date", date);
                 edit.putExtra("Time", time);

@@ -53,6 +53,9 @@ import java.util.ArrayList;
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
+//=============================================================================
+// Displays chat history if the user is in an event
+//=============================================================================
 
 public class ChatFragment extends Fragment {
     EditText inputField;
@@ -75,58 +78,66 @@ public class ChatFragment extends Fragment {
     // After View has been inflated, reference all the methods that need to be called
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        inputField = view.findViewById(R.id.messageInputField);
-        send = view.findViewById(R.id.sendButton);
-        imageBtn = view.findViewById(R.id.imageButton);
-        getEventChatID();
-        chatRecylerView = view.findViewById(R.id.messages_recycler_view);
-        chatRecylerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final MessagesAdapter adapter = new MessagesAdapter(getContext(), messageArray);
-        chatRecylerView.setAdapter(adapter);
+        // Check if user is in an event first!
+        if(!User.eventid.equals("null")) {
 
+            inputField = view.findViewById(R.id.messageInputField);
+            send = view.findViewById(R.id.sendButton);
+            imageBtn = view.findViewById(R.id.imageButton);
+            getEventChatID();
+            chatRecylerView = view.findViewById(R.id.messages_recycler_view);
+            chatRecylerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            final MessagesAdapter adapter = new MessagesAdapter(getContext(), messageArray);
+            chatRecylerView.setAdapter(adapter);
+            Firebase.setAndroidContext(view.getContext());
 
-        Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/chat/"+eventChatId);
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                adapter.clear();
-                for(DataSnapshot child : dataSnapshot.getChildren() ){
-                    String userid = child.child("userid").getValue().toString();
-                    String messageFieldOutput = child.child("message").getValue().toString();
-                    String senderName = child.child("senderName").getValue().toString();
-                    messageArray.add(new Message(userid, messageFieldOutput, senderName, "--:--", false));
+            Firebase reference = new Firebase("https://grouptracker-ef84c.firebaseio.com/chat/" + eventChatId);
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    adapter.clear();
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        String userid = child.child("userid").getValue().toString();
+                        String messageFieldOutput = child.child("message").getValue().toString();
+                        String senderName = child.child("senderName").getValue().toString();
+                        messageArray.add(new Message(userid, messageFieldOutput, senderName, "--:--", false));
+                    }
+                    chatRecylerView.scrollToPosition(adapter.getItemCount() - 1);
+                    adapter.notifyDataSetChanged();
                 }
-                chatRecylerView.scrollToPosition(adapter.getItemCount()-1);
-                adapter.notifyDataSetChanged();
-            }
-            @Override
-            public void onCancelled(FirebaseError firebaseError) { }
-        });
 
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Message msg = new Message(User.uid, inputField.getText().toString(), User.firstName, "--:--", false);
-                messageArray.add(msg);
-                postChatMessages(msg);
-                adapter.notifyDataSetChanged();
-                inputField.setText("");
-                chatRecylerView.scrollToPosition(adapter.getItemCount()-1);
-            }
-        });
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                }
+            });
 
-        imageBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectImage();
-                adapter.notifyDataSetChanged();
-            }
-        });
+            send.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Message msg = new Message(User.uid, inputField.getText().toString(), User.firstName, "--:--", false);
+                    messageArray.add(msg);
+                    postChatMessages(msg);
+                    adapter.notifyDataSetChanged();
+                    inputField.setText("");
+                    chatRecylerView.scrollToPosition(adapter.getItemCount() - 1);
+                }
+            });
+
+            imageBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    selectImage();
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+
+        // If user not in an event, show toast
+        else {
+            Toast.makeText(getContext(), "You should join an event!", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    public void getChatMessages(final MessagesAdapter adapter){
-
-    }
 
     public void postChatMessages(final Message msg){
 

@@ -34,6 +34,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Calendar;
 
+//=============================================================================
+// Change any field in ViewEventsFragment page and save to Firebase
+//=============================================================================
+
 public class EventEdit extends AppCompatActivity {
 
     EditText editEventName, editEventDetails;
@@ -61,13 +65,15 @@ public class EventEdit extends AppCompatActivity {
         eventLocation = edit.getExtras().getString("Location");
         eventTime = edit.getExtras().getString("Time");
         eventDescription = edit.getExtras().getString("Description");
-        eventImage = edit.getExtras().getString("Image");
+        //eventImage = edit.getExtras().getString("Image");
 
+        /*
         User.bitmap = eventImage;
         byte[] imageBytes2 = Base64.decode(eventImage, Base64.DEFAULT);
         Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.length);
         editImageView.setScaleType(ImageView.ScaleType.FIT_XY);
         editImageView.setImageBitmap(decodedImage);
+        */
 
         editDate.setText(eventDate);
         editEventDetails.setText(eventDescription);
@@ -111,8 +117,8 @@ public class EventEdit extends AppCompatActivity {
                 eventLocation = editLocation.getText().toString();
                 eventTime = editTime.getText().toString();
                 eventDescription = editEventDetails.getText().toString();
-                eventImage = User.bitmap;
-                saveToFirebase(eventDate, eventDescription, eventImage, eventLocation, eventName, eventTime);
+                //eventImage = User.bitmap;
+                saveToFirebase(eventDate, eventDescription, User.bitmap, eventLocation, eventName, eventTime);
                 startActivity(new Intent(EventEdit.this, MainActivity.class));
                 finish();
             }

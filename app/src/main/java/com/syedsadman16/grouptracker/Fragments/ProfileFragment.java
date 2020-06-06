@@ -18,6 +18,11 @@ import com.syedsadman16.grouptracker.Activities.SignIn;
 import com.syedsadman16.grouptracker.Models.User;
 import com.syedsadman16.grouptracker.R;
 
+//=============================================================================
+// Displays basic information about the user
+//  - Will add profile pictures (reflected in chat and UserListAdapter as well)
+//  - Use same logic as EventEdit to change user information
+//=============================================================================
 
 public class ProfileFragment extends Fragment {
 

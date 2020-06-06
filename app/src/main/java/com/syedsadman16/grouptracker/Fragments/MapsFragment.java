@@ -122,18 +122,20 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
         }
 
         mapView = (MapView) view.findViewById(R.id.mapView);
-        mapView.onCreate(mapViewBundle);
-        mapView.getMapAsync(this);
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
-
-        memberRecyclerView = view.findViewById(R.id.member_list);
-        memberRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
         destinationButton = view.findViewById(R.id.destBtn);
         helpButton = view.findViewById(R.id.helpButton);
 
-        createNotificationChannel();
+        Firebase.setAndroidContext(view.getContext());
+        mapView.onCreate(mapViewBundle);
+        mapView.getMapAsync(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
+
+        if(!User.eventid.equals("null")) {
+            memberRecyclerView = view.findViewById(R.id.member_list);
+            memberRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            createNotificationChannel();
+        }
+
     }
 
 
@@ -165,7 +167,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                         if (location != null) {
                             map.setMyLocationEnabled(true);
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
-                            if(User.eventid != "null") {
+                            if(!User.eventid.equals("null")) {
                                 notificationListener();
                                 startLocationUpdates();
                                 getMemberLocations();
@@ -176,19 +178,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, UserLi
                     }
                 });
 
-        destinationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getEventLocation(map);
-            }
-        });
+        if(!User.eventid.equals("null")) {
+            destinationButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getEventLocation(map);
+                }
+            });
 
-        helpButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setFirebaseNotificationStatus(User.fullName+ " needs help!");
-            }
-        });
+            helpButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    setFirebaseNotificationStatus(User.fullName + " needs help!");
+                }
+            });
+        }
     }
 
 
